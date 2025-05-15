@@ -1,0 +1,17 @@
+{
+  "apiVersion": 2,
+  "name": "lone-magnet/cta",
+  "title": "Call to Action",
+  "category": "widgets",
+  "icon": "megaphone",
+  "description": "Простой блок призыва к действию",
+  "editorScript": "file:./build/cta.js",
+  "editorStyle": "file:./build/index.css",
+  "style": "file:./style.css",
+  "attributes": {
+    "message": {
+      "type": "string",
+      "default": "Закажите магнит прямо сейчас!"
+    }
+  }
+}
