@@ -4,7 +4,8 @@ module.exports = {
     "./assets/**/*.js",
     './blocks/**/*.js',
     './blocks/**/*.jsx',
-    './blocks/**/*.php'
+    './blocks/**/*.php',
+    './woocommerce/**/*.php',
   ],
   theme: {
     extend: {},
