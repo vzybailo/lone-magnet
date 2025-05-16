@@ -14,6 +14,7 @@ function lone_setup_theme() {
     add_theme_support('html5', ['search-form', 'comment-form', 'gallery', 'caption']);
     add_theme_support('editor-styles'); 
     add_editor_style('style.css'); 
+    add_theme_support('custom-logo');
 }
 add_action('after_setup_theme', 'lone_setup_theme');
 
@@ -21,3 +22,12 @@ function magnets_shop_register_blocks() {
     register_block_type(__DIR__ . '/blocks/cta');
 }
 add_action('init', 'magnets_shop_register_blocks');
+
+function register_my_menus() {
+    register_nav_menus([
+        'header-menu' => __('Header Menu'),
+        'footer-menu' => __('Footer Menu'),
+    ]);
+}
+add_action('after_setup_theme', 'register_my_menus');
+
