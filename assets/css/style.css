@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'PoppinsLight';
+  src: url('/wp-content/themes/lone-magnet/assets/fonts/Poppins-ExtraLight.woff') format('woff');
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PoppinsRegular';
+  src: url('/wp-content/themes/lone-magnet/assets/fonts/Poppins-Regular.woff') format('woff');
+  font-style: normal;
+}
+
+html, body {
+  font-family: 'PoppinsRegular';
+}
 /* В style.css темы */
 .no-spinner::-webkit-inner-spin-button, 
 .no-spinner::-webkit-outer-spin-button {

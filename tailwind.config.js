@@ -8,7 +8,15 @@ module.exports = {
     './woocommerce/**/*.php',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        reg: ['PoppinsRegular', 'sans-serif'],
+        light: ['PoppinsLight', 'sans-serif']
+      },
+      colors: {
+        gold: '#ffba00'
+      }
+    },
   },
   plugins: [],
 }
