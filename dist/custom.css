@@ -1,0 +1,54 @@
+.container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    width: 1536px;
+  }
+}
+
+.woocommerce .quantity .qty {
+  width: 100%;
+}
+.woocommerce img, .woocommerce-page img {
+  width: auto;
+  height: 100%;
+}
+.woocommerce .star-rating {
+  float: none;
+}
+.woocommerce nav.woocommerce-pagination ul li {
+  border-right: 0;
+}
+.woocommerce nav.woocommerce-pagination ul {
+  border: none;
+}
+.woocommerce p.stars a::before {
+  color: #ffba00;
+}
