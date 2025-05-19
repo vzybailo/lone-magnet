@@ -1,19 +1,26 @@
 document.addEventListener('DOMContentLoaded', function () {
     // мгновенный пересчет цены в зависимости от количества
 
-    const priceElement = document.querySelector('.woocommerce-Price-amount')
+    const regPrice = document.querySelector('.lone-regular-price .woocommerce-Price-amount')
+    const salePrice = document.querySelector('.lone-sale-price .woocommerce-Price-amount')
+    const savePrice = document.querySelector('.lone-save-summ')
     const quantityInput = document.querySelector('.qty')
 
-    if (!priceElement || !quantityInput) return
+    if (!regPrice || !salePrice || !quantityInput) return
 
-    const currencySymbol = priceElement.querySelector('.woocommerce-Price-currencySymbol')?.textContent || '$'
-    const basePrice = parseFloat(priceElement.textContent.replace(/[^0-9.]/g, ''))
+    const currencySymbol = regPrice.querySelector('.woocommerce-Price-currencySymbol')?.textContent || '$'
+    const baseRegPrice = parseFloat(regPrice.textContent.replace(/[^0-9.]/g, ''))
+    const baseSalePrice = parseFloat(salePrice.textContent.replace(/[^0-9.]/g, ''))
 
     function updatePrice() {
         const quantity = parseInt(quantityInput.value) || 1
-        const newTotal = (basePrice * quantity).toFixed(2)
+        const newRegTotal = (baseRegPrice * quantity).toFixed(2)
+        const newSalePrice = (baseSalePrice * quantity).toFixed(2)
+        const newSaveSumm = (newRegTotal - newSalePrice).toFixed(0)
 
-        priceElement.innerHTML = `<bdi><span class="woocommerce-Price-currencySymbol">${currencySymbol}</span>${newTotal}</bdi>`
+        regPrice.innerHTML = `<bdi><span class="woocommerce-Price-currencySymbol">${currencySymbol}</span>${newRegTotal}</bdi>`
+        salePrice.innerHTML = `<bdi><span class="woocommerce-Price-currencySymbol">${currencySymbol}</span>${newSalePrice}</bdi>`
+        savePrice.innerHTML = `<bdi><span class="woocommerce-Price-currencySymbol">You save ${currencySymbol}</span>${newSaveSumm}</bdi>`
     }
 
     quantityInput.addEventListener('input', updatePrice)

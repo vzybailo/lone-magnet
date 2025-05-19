@@ -14,7 +14,10 @@ module.exports = {
         light: ['PoppinsLight', 'sans-serif']
       },
       colors: {
-        gold: '#ffba00'
+        gold: '#ffba00',
+        gray: '#555',
+        red: '#FF0101',
+        green: '#008000'
       }
     },
   },

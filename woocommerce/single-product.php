@@ -46,7 +46,10 @@ $gallery_ids = $product->get_gallery_image_ids();
             </div>
 
             <div class="mb-4">
-                <?php echo $product->get_price_html(); ?>
+                <?php 
+                    echo $product->get_price_html(); 
+                    do_action('woocommerce_template_single_price')
+                ?>
             </div>
 
             <form class="cart mb-6" method="post" enctype="multipart/form-data">
