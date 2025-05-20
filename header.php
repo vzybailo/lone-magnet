@@ -8,7 +8,7 @@
 <body <?php body_class(); ?>>
   <header class="border-b">
     <div class="bg-gray-800 text-white text-center text-sm py-2">🚚✈️ FREE SHIPPING on US orders over $40</div>
-    <div class="container mx-auto flex justify-between items-center py-8">
+    <div class="container mx-auto flex justify-between items-center py-8 max-sm:px-4">
       <a href="<?php echo esc_url(home_url('/')); ?>" class="flex items-center">
         <?php 
           if (has_custom_logo()) {

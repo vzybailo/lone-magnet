@@ -77,7 +77,7 @@ add_action('wp_enqueue_scripts', 'enqueue_photo_upload_script');
 // custom classes for price
 function custom_woocommerce_price_html( $price, $product ) {
     if ( $product->is_on_sale() ) {
-        return '<span class="lone-regular-price line-through text-gray mr-2">' . wc_price( $product->get_regular_price() ) . '</span>' .
+        return '<span class="lone-regular-price line-through text-grey mr-2">' . wc_price( $product->get_regular_price() ) . '</span>' .
                '<span class="lone-sale-price text-red-600 text-red font-bold">' . wc_price( $product->get_sale_price() ) . '</span>';
     }
 
@@ -86,7 +86,7 @@ function custom_woocommerce_price_html( $price, $product ) {
 add_filter( 'woocommerce_get_price_html', 'custom_woocommerce_price_html', 100, 2 );
 
 function lone_save_summ() {
-    echo '<div class="lone-save-summ"></div>';
+    echo '<div class="lone-save-summ text-green text-sm"></div>';
 }
 add_action('woocommerce_template_single_price', 'lone_save_summ');
 
