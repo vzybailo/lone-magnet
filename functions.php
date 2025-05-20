@@ -52,33 +52,29 @@ add_action('init', 'magnets_shop_register_blocks');
 
 // add upload button
 function render_custom_upload_button() {
-    echo '<button class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2" id="custom-photo-upload">Add photos</button>';
+    echo '<button type="button" class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2" id="custom-photo-upload">Add photos</button>';
+    echo '<div id="custom-photo-modal-root"></div>';
+    echo '<div class="lone-alert text-sm"></div>';
 }
 add_action('woocommerce_before_add_to_cart_button', 'render_custom_upload_button');
 
-function enqueue_photo_upload_script() {
-    if (is_product()) {
-        wp_enqueue_script(
-            'photo-upload',
-            get_template_directory_uri() . '/blocks/photo-upload/build/index.js',
-            [ 'react', 'react-dom' ],
-            null,
-            true
-        );
-
-        wp_enqueue_style(
-            'photo-upload-style',
-            get_template_directory_uri() . '/blocks/photo-upload/style.css'
-        );
-    }
+function enqueue_custom_photo_upload_script() {
+    wp_enqueue_script(
+        'photo-upload',
+        get_template_directory_uri() . '/assets/js/photo-upload.js',
+        array('wp-element'), // React dependencies
+        null,
+        true
+    );
 }
-add_action('wp_enqueue_scripts', 'enqueue_photo_upload_script');
+add_action('wp_enqueue_scripts', 'enqueue_custom_photo_upload_script');
+
 
 // custom classes for price
 function custom_woocommerce_price_html( $price, $product ) {
     if ( $product->is_on_sale() ) {
         return '<span class="lone-regular-price line-through text-grey mr-2">' . wc_price( $product->get_regular_price() ) . '</span>' .
-               '<span class="lone-sale-price text-red-600 text-red font-bold">' . wc_price( $product->get_sale_price() ) . '</span>';
+               '<span class="lone-sale-price text-red font-bold">' . wc_price( $product->get_sale_price() ) . '</span>';
     }
 
     return '<span class="lone-regular-price text-black font-semibold">' . wc_price( $product->get_regular_price() ) . '</span>';

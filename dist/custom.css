@@ -52,3 +52,12 @@
 .woocommerce p.stars a::before {
   color: #ffba00;
 }
+#lone-add-to-cart:disabled {
+  opacity: .7;
+}
+.warn {
+  color: #d48806;
+}
+.success {
+  color: #008000;
+}

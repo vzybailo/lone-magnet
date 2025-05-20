@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tailwindcss -i ./assets/css/style.css -o ./dist/style.css --watch",
+    "build:js": "esbuild assets/js/photo-upload.jsx --bundle --outfile=assets/js/photo-upload.js --loader:.jsx=jsx",
     "build-blocks": "wp-scripts build blocks/photo-upload/index.js --output-path=blocks/photo-upload/build --output-filename=index.js"
   },
   "keywords": [],
@@ -12,6 +13,7 @@
   "description": "",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.4",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17"
   },
