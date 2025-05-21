@@ -52,7 +52,7 @@ add_action('init', 'magnets_shop_register_blocks');
 
 // add upload button
 function render_custom_upload_button() {
-    echo '<button type="button" class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2" id="custom-photo-upload">Add photos</button>';
+    echo '<button type="button" class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
     echo '<div id="custom-photo-modal-root"></div>';
     echo '<div class="lone-alert text-sm"></div>';
 }
@@ -66,6 +66,10 @@ function enqueue_custom_photo_upload_script() {
         null,
         true
     );
+
+    wp_localize_script('photo-upload', 'wpApiSettings', [
+        'nonce' => wp_create_nonce('wp_rest')
+    ]);
 }
 add_action('wp_enqueue_scripts', 'enqueue_custom_photo_upload_script');
 
@@ -85,4 +89,30 @@ function lone_save_summ() {
     echo '<div class="lone-save-summ text-green text-sm"></div>';
 }
 add_action('woocommerce_template_single_price', 'lone_save_summ');
+
+// настройка загрузки фото
+add_action('wp_ajax_upload_user_photo', 'upload_user_photo');
+add_action('wp_ajax_nopriv_upload_user_photo', 'upload_user_photo');
+
+function upload_user_photo() {
+    if (!function_exists('wp_handle_upload')) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+    }
+
+    $file = $_FILES['photo'];
+    $upload_overrides = ['test_form' => false];
+
+    $movefile = wp_handle_upload($file, $upload_overrides);
+
+    if ($movefile && !isset($movefile['error'])) {
+        wp_send_json_success([
+            'url' => $movefile['url'],
+            'filename' => basename($movefile['file']),
+        ]);
+    } else {
+        wp_send_json_error(['message' => $movefile['error'] ?? 'Upload failed']);
+    }
+
+    wp_die();
+}
 

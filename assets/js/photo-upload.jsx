@@ -56,7 +56,7 @@ const PhotoUploadApp = () => {
       } else {
         alertMsg.classList.remove('warn')
         alertMsg.classList.add('success')
-        alertMsg.innerHTML = `<div class="py-2">✅ You are successfully uploaded <b>${requiredPhotos}</b>. </div>`
+        alertMsg.innerHTML = `<div class="py-2">✅ You have successfully uploaded <b>${requiredPhotos}</b>. </div>`
       }
     };
 
@@ -75,64 +75,93 @@ const PhotoUploadApp = () => {
     const alertMsg = document.querySelector('.lone-alert');
 
     if (
-        alertMsg &&
-        alertMsg.classList.contains('warn') &&
-        uploadedPhotos.length < requiredPhotos
+      alertMsg &&
+      alertMsg.classList.contains('warn') &&
+      uploadedPhotos.length < requiredPhotos
     ) {
-        alertMsg.innerHTML = `<div class="py-2"> ⚠️ Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You’ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
+      alertMsg.innerHTML = `<div class="py-2"> ⚠️ Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You’ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
     }
 
-    // Если пользователь сократил количество, и фото достаточно — можно убрать предупреждение
     if (
-        alertMsg &&
-        uploadedPhotos.length >= requiredPhotos &&
-        alertMsg.classList.contains('warn')
+      alertMsg &&
+      uploadedPhotos.length >= requiredPhotos &&
+      alertMsg.classList.contains('warn')
     ) {
-        alertMsg.classList.remove('warn');
-        alertMsg.classList.add('success');
-        alertMsg.innerHTML = `<div class="py-2">✅ You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? 's' : ''}.</div>`;
+      alertMsg.classList.remove('warn');
+      alertMsg.classList.add('success');
+      alertMsg.innerHTML = `<div class="py-2">✅ You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? 's' : ''}.</div>`;
     }
- }, [uploadedPhotos, requiredPhotos]);
+  }, [uploadedPhotos, requiredPhotos]);
 
+  // 🆕 Функция загрузки фото на WordPress и добавления его в uploadedPhotos
+  const handlePhotoComplete = async (croppedBlob) => {
+    const formData = new FormData();
+    formData.append("action", "upload_user_photo");
+    formData.append("photo", croppedBlob);
 
-  // Обработка загрузки фото
-  const handlePhotoComplete = (photo) => {
-    setUploadedPhotos((prev) => {
-      const updatedPhotos = [...prev, photo];
-      if (updatedPhotos.length >= requiredPhotos) {
-        setShowModal(false);
+    if (!croppedBlob) return;
+
+    try {
+      const response = await fetch("/wp-admin/admin-ajax.php", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const newPhotos = [...uploadedPhotos, result.data.url];
+        setUploadedPhotos(newPhotos);
+
+        // 🆕 Сохраняем во временное хранилище
+        sessionStorage.setItem("magnet_photos", JSON.stringify(newPhotos));
+
+        if (newPhotos.length >= requiredPhotos) {
+          setShowModal(false);
+        }
+      } else {
+        console.error("Upload error:", result.data.message);
       }
-      return updatedPhotos;
-    });
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
   };
 
+  useEffect(() => {
+    const saved = sessionStorage.getItem("magnet_photos");
+    if (saved) {
+      setUploadedPhotos(JSON.parse(saved));
+    }
+  }, []);
+
+  // Обработчик кнопки "Загрузить фото"
   useEffect(() => {
     const uploadBtn = document.querySelector("#custom-photo-upload");
 
     const handleUploadClick = (e) => {
-        e.preventDefault();
-        setShowModal(true);
+      e.preventDefault();
+      setShowModal(true);
     };
 
     if (uploadBtn) {
-        uploadBtn.addEventListener("click", handleUploadClick);
+      uploadBtn.addEventListener("click", handleUploadClick);
     }
 
     return () => {
-        if (uploadBtn) {
+      if (uploadBtn) {
         uploadBtn.removeEventListener("click", handleUploadClick);
-        }
+      }
     };
   }, []);
 
-
   return (
     <>
+      {/* 🆕 Модалка появляется при showModal и если не загружено достаточно фото */}
       {showModal && uploadedPhotos.length < requiredPhotos && (
         <PhotoModal
           currentIndex={uploadedPhotos.length + 1}
           total={requiredPhotos}
-          onComplete={handlePhotoComplete}
+          onComplete={handlePhotoComplete} // 🆕 новая функция обработки
           onClose={() => setShowModal(false)}
         />
       )}

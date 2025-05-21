@@ -64,7 +64,7 @@ $gallery_ids = $product->get_gallery_image_ids();
                     <div class="mb-2">
                         <?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
                     </div>
-                    <button id="lone-add-to-cart" type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="bg-blue-700 text-white hover:bg-blue-800 p-2">
+                    <button id="lone-add-to-cart" type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="bg-blue-700 text-white hover:bg-blue-800 p-2 transition-colors duration-300">
                         Add to cart
                     </button>
                 </div>

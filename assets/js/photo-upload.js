@@ -1092,11 +1092,11 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useReducer(reducer, initialArg, init);
           }
-          function useRef(initialValue) {
+          function useRef2(initialValue) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useRef(initialValue);
           }
-          function useEffect2(create, deps) {
+          function useEffect3(create, deps) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useEffect(create, deps);
           }
@@ -1879,14 +1879,14 @@
           exports.useContext = useContext;
           exports.useDebugValue = useDebugValue;
           exports.useDeferredValue = useDeferredValue;
-          exports.useEffect = useEffect2;
+          exports.useEffect = useEffect3;
           exports.useId = useId;
           exports.useImperativeHandle = useImperativeHandle;
           exports.useInsertionEffect = useInsertionEffect;
           exports.useLayoutEffect = useLayoutEffect;
           exports.useMemo = useMemo;
           exports.useReducer = useReducer;
-          exports.useRef = useRef;
+          exports.useRef = useRef2;
           exports.useState = useState3;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
@@ -24729,32 +24729,34 @@
   );
 
   // assets/js/components/utils/getCroppedImg.js
-  function getCroppedImg(imageSrc, crop) {
+  function getCroppedImg(imageSrc, croppedAreaPixels) {
     return new Promise((resolve, reject) => {
       const image = new Image();
-      image.src = imageSrc;
       image.crossOrigin = "anonymous";
+      image.src = imageSrc;
       image.onload = () => {
         const canvas = document.createElement("canvas");
-        canvas.width = crop.width;
-        canvas.height = crop.height;
+        canvas.width = croppedAreaPixels.width;
+        canvas.height = croppedAreaPixels.height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(
           image,
-          crop.x,
-          crop.y,
-          crop.width,
-          crop.height,
+          croppedAreaPixels.x,
+          croppedAreaPixels.y,
+          croppedAreaPixels.width,
+          croppedAreaPixels.height,
           0,
           0,
-          crop.width,
-          crop.height
+          croppedAreaPixels.width,
+          croppedAreaPixels.height
         );
         canvas.toBlob((blob) => {
-          if (!blob) return reject(new Error("Canvas is empty"));
-          const fileUrl = URL.createObjectURL(blob);
-          resolve(fileUrl);
-        }, "image/jpeg");
+          if (!blob) {
+            reject(new Error("Canvas is empty"));
+            return;
+          }
+          resolve(blob);
+        }, "image/jpeg", 0.95);
       };
       image.onerror = () => reject(new Error("Failed to load image"));
     });
@@ -24766,34 +24768,129 @@
     const [crop, setCrop] = (0, import_react.useState)({ x: 0, y: 0 });
     const [zoom, setZoom] = (0, import_react.useState)(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = (0, import_react.useState)(null);
+    const [isSaving, setIsSaving] = (0, import_react.useState)(false);
+    const fileInputRef = (0, import_react.useRef)(null);
     const onCropComplete = (0, import_react.useCallback)((_, croppedAreaPixels2) => {
       setCroppedAreaPixels(croppedAreaPixels2);
     }, []);
     const handleFileChange = async (e) => {
       const file = e.target.files?.[0];
       if (file) {
+        if (!file.type.startsWith("image/")) {
+          alert("\u041C\u043E\u0436\u043D\u043E \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0442\u044C \u0442\u043E\u043B\u044C\u043A\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F.");
+          return;
+        }
         const reader = new FileReader();
-        reader.addEventListener("load", () => setImageSrc(reader.result));
+        reader.addEventListener("load", () => {
+          setImageSrc(reader.result);
+          setCrop({ x: 0, y: 0 });
+          setZoom(1);
+          setCroppedAreaPixels(null);
+        });
         reader.readAsDataURL(file);
       }
     };
     const handleSave = async () => {
-      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      onComplete(croppedImage);
-      setImageSrc(null);
-    };
-    return /* @__PURE__ */ import_react.default.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "bg-white p-4 rounded max-w-lg w-full relative" }, /* @__PURE__ */ import_react.default.createElement("button", { onClick: onClose, className: "absolute top-2 right-2 text-black" }, "\u2715"), /* @__PURE__ */ import_react.default.createElement("p", { className: "mb-2" }, "\u0424\u043E\u0442\u043E ", currentIndex, " \u0438\u0437 ", total), !imageSrc && /* @__PURE__ */ import_react.default.createElement("input", { type: "file", accept: "image/*", onChange: handleFileChange }), imageSrc && /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement("div", { className: "relative w-full h-96 bg-gray-200" }, /* @__PURE__ */ import_react.default.createElement(
-      Cropper,
-      {
-        image: imageSrc,
-        crop,
-        zoom,
-        aspect: 1,
-        onCropChange: setCrop,
-        onZoomChange: setZoom,
-        onCropComplete
+      setIsSaving(true);
+      try {
+        const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
+        const file = new File([croppedImage], `photo-${currentIndex}.jpg`, {
+          type: "image/jpeg"
+        });
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("title", `Photo ${currentIndex}`);
+        formData.append("alt_text", `Uploaded photo ${currentIndex}`);
+        const response = await fetch("/wp-json/wp/v2/media", {
+          method: "POST",
+          headers: {
+            "X-WP-Nonce": window.wpApiSettings?.nonce || ""
+          },
+          body: formData
+        });
+        if (!response.ok) {
+          throw new Error("\u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u0432 WordPress");
+        }
+        const data = await response.json();
+        onComplete({
+          id: data.id,
+          url: data.source_url,
+          title: data.title.rendered
+        });
+        setImageSrc(null);
+      } catch (err) {
+        console.error("Upload error:", err);
+        alert("\u041E\u0448\u0438\u0431\u043A\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+      } finally {
+        setIsSaving(false);
       }
-    )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between mt-4" }, /* @__PURE__ */ import_react.default.createElement("button", { onClick: onClose, className: "px-4 py-2 bg-gray-300 rounded" }, "\u041E\u0442\u043C\u0435\u043D\u0430"), /* @__PURE__ */ import_react.default.createElement("button", { onClick: handleSave, className: "px-4 py-2 bg-blue-500 text-white rounded" }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C")))));
+    };
+    const handleDrop = (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files?.[0];
+      if (file) {
+        const event = { target: { files: [file] } };
+        handleFileChange(event);
+      }
+    };
+    (0, import_react.useEffect)(() => {
+      const handleKey = (e) => {
+        if (e.key === "Escape") onClose();
+      };
+      window.addEventListener("keydown", handleKey);
+      return () => window.removeEventListener("keydown", handleKey);
+    }, [onClose]);
+    return /* @__PURE__ */ import_react.default.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" }, /* @__PURE__ */ import_react.default.createElement(
+      "div",
+      {
+        className: "bg-white p-4 max-w-lg w-full relative",
+        onDrop: handleDrop,
+        onDragOver: (e) => e.preventDefault()
+      },
+      /* @__PURE__ */ import_react.default.createElement("button", { onClick: onClose, className: "absolute top-2 right-2 text-black" }, "\u2715"),
+      /* @__PURE__ */ import_react.default.createElement("h3", { className: "font-bold text-center text-xl" }, "Upload your files"),
+      /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center font-light" }, "Files can be JPG, JPEG or PNG"),
+      /* @__PURE__ */ import_react.default.createElement("p", { className: "mb-2 text-center" }, "Photo ", currentIndex, " from ", total),
+      !imageSrc && /* @__PURE__ */ import_react.default.createElement("div", { className: "border-dashed border-2 border-gray-300 p-4 text-center" }, /* @__PURE__ */ import_react.default.createElement("p", { className: "mb-2" }, "Drag & Drop file here"), /* @__PURE__ */ import_react.default.createElement("div", { className: "mb-4" }, "or"), /* @__PURE__ */ import_react.default.createElement("label", { className: "bg-teal-500 text-white hover:bg-teal-600 w-full p-2 cursor-pointer", htmlFor: "upload-photo" }, "Browse for file "), /* @__PURE__ */ import_react.default.createElement(
+        "input",
+        {
+          type: "file",
+          accept: "image/*",
+          onChange: handleFileChange,
+          ref: fileInputRef,
+          className: "mx-auto hidden",
+          id: "upload-photo"
+        }
+      )),
+      imageSrc && /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement("div", { className: "relative w-full h-96 bg-gray-200" }, /* @__PURE__ */ import_react.default.createElement(
+        Cropper,
+        {
+          image: imageSrc,
+          crop,
+          zoom,
+          aspect: 1,
+          onCropChange: setCrop,
+          onZoomChange: setZoom,
+          onCropComplete
+        }
+      )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between mt-4" }, /* @__PURE__ */ import_react.default.createElement(
+        "button",
+        {
+          onClick: onClose,
+          disabled: isSaving,
+          className: "px-4 py-2 bg-gray-300"
+        },
+        "Cancel"
+      ), /* @__PURE__ */ import_react.default.createElement(
+        "button",
+        {
+          onClick: handleSave,
+          disabled: isSaving,
+          className: `px-4 py-2 text-white ${isSaving ? "bg-blue-300" : "bg-blue-500"}`
+        },
+        isSaving ? "Saving..." : "Save"
+      )))
+    ));
   }
 
   // assets/js/photo-upload.jsx
@@ -24839,7 +24936,7 @@
         } else {
           alertMsg.classList.remove("warn");
           alertMsg.classList.add("success");
-          alertMsg.innerHTML = `<div class="py-2">\u2705 You are successfully uploaded <b>${requiredPhotos}</b>. </div>`;
+          alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b>. </div>`;
         }
       };
       if (addToCartBtn) {
@@ -24862,15 +24959,37 @@
         alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
       }
     }, [uploadedPhotos, requiredPhotos]);
-    const handlePhotoComplete = (photo) => {
-      setUploadedPhotos((prev) => {
-        const updatedPhotos = [...prev, photo];
-        if (updatedPhotos.length >= requiredPhotos) {
-          setShowModal(false);
+    const handlePhotoComplete = async (croppedBlob) => {
+      const formData = new FormData();
+      formData.append("action", "upload_user_photo");
+      formData.append("photo", croppedBlob);
+      if (!croppedBlob) return;
+      try {
+        const response = await fetch("/wp-admin/admin-ajax.php", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+          const newPhotos = [...uploadedPhotos, result.data.url];
+          setUploadedPhotos(newPhotos);
+          sessionStorage.setItem("magnet_photos", JSON.stringify(newPhotos));
+          if (newPhotos.length >= requiredPhotos) {
+            setShowModal(false);
+          }
+        } else {
+          console.error("Upload error:", result.data.message);
         }
-        return updatedPhotos;
-      });
+      } catch (error) {
+        console.error("Upload failed:", error);
+      }
     };
+    (0, import_react2.useEffect)(() => {
+      const saved = sessionStorage.getItem("magnet_photos");
+      if (saved) {
+        setUploadedPhotos(JSON.parse(saved));
+      }
+    }, []);
     (0, import_react2.useEffect)(() => {
       const uploadBtn = document.querySelector("#custom-photo-upload");
       const handleUploadClick = (e) => {
