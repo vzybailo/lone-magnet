@@ -94,12 +94,18 @@ const PhotoUploadApp = () => {
   }, [uploadedPhotos, requiredPhotos]);
 
   // 🆕 Функция загрузки фото на WordPress и добавления его в uploadedPhotos
-  const handlePhotoComplete = async (croppedBlob) => {
+  // Этот параметр должен быть именно Blob или File
+  const handlePhotoComplete = async (blob) => {
+    if (!blob) return;
+
+    // ✅ Обязательно преобразуем Blob в File
+    const file = new File([blob], "photo.jpg", {
+      type: blob.type || "image/jpeg", // если есть type
+    });
+
     const formData = new FormData();
     formData.append("action", "upload_user_photo");
-    formData.append("photo", croppedBlob);
-
-    if (!croppedBlob) return;
+    formData.append("photo", file);
 
     try {
       const response = await fetch("/wp-admin/admin-ajax.php", {
@@ -112,8 +118,6 @@ const PhotoUploadApp = () => {
       if (result.success) {
         const newPhotos = [...uploadedPhotos, result.data.url];
         setUploadedPhotos(newPhotos);
-
-        // 🆕 Сохраняем во временное хранилище
         sessionStorage.setItem("magnet_photos", JSON.stringify(newPhotos));
 
         if (newPhotos.length >= requiredPhotos) {
@@ -126,6 +130,7 @@ const PhotoUploadApp = () => {
       console.error("Upload failed:", error);
     }
   };
+
 
   useEffect(() => {
     const saved = sessionStorage.getItem("magnet_photos");

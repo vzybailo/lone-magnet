@@ -13,7 +13,7 @@ $gallery_ids = $product->get_gallery_image_ids();
         <div class="w-2/3 grid grid-cols-2 gap-4 mr-6 max-sm:w-full max-sm:grid-cols-1 max-sm:mr-0 max-sm:mb-4">
             <?php if ($main_image_id): 
                 $full_url = wp_get_attachment_image_url($main_image_id, 'full');
-                $thumb = wp_get_attachment_image($main_image_id, 'medium', false, ['class' => 'w-full h-full object-cover']);
+                $thumb = wp_get_attachment_image($main_image_id, 'medium', false, ['class' => 'w-full h-full object-cover mag-pic']);
             ?>
                 <a href="<?php echo esc_url($full_url); ?>"
                     class="glightbox aspect-square overflow-hidden"
@@ -26,7 +26,7 @@ $gallery_ids = $product->get_gallery_image_ids();
             $index = 1;
             foreach ($gallery_ids as $id): 
                 $full = wp_get_attachment_image_url($id, 'full');
-                $thumb = wp_get_attachment_image($id, 'medium', false, ['class' => 'w-full h-full object-cover']);
+                $thumb = wp_get_attachment_image($id, 'medium', false, ['class' => 'w-full h-full object-cover mag-pic']);
             ?>
                 <a href="<?php echo esc_url($full); ?>"
                     class="glightbox aspect-square overflow-hidden <?php echo $index === 0 ? '' : 'max-sm:hidden'; ?>"

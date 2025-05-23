@@ -24959,11 +24959,15 @@
         alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
       }
     }, [uploadedPhotos, requiredPhotos]);
-    const handlePhotoComplete = async (croppedBlob) => {
+    const handlePhotoComplete = async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "photo.jpg", {
+        type: blob.type || "image/jpeg"
+        // если есть type
+      });
       const formData = new FormData();
       formData.append("action", "upload_user_photo");
-      formData.append("photo", croppedBlob);
-      if (!croppedBlob) return;
+      formData.append("photo", file);
       try {
         const response = await fetch("/wp-admin/admin-ajax.php", {
           method: "POST",
