@@ -60,7 +60,7 @@ $gallery_ids = $product->get_gallery_image_ids();
                     <div class="mb-2 text-sm font-light">Quantity</div>
                     <?php woocommerce_quantity_input(); ?>
                 </div>
-                <div class="flex flex-col w-1/2 max-sm:w-full">
+                <div class="flex flex-col max-sm:w-full">
                     <div class="mb-2">
                         <?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
                     </div>

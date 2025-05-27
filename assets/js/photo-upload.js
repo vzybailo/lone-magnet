@@ -23890,6 +23890,58 @@
   var import_react2 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
+  // node_modules/uuid/dist/esm-browser/stringify.js
+  var byteToHex = [];
+  for (let i = 0; i < 256; ++i) {
+    byteToHex.push((i + 256).toString(16).slice(1));
+  }
+  function unsafeStringify(arr, offset = 0) {
+    return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+  }
+
+  // node_modules/uuid/dist/esm-browser/rng.js
+  var getRandomValues;
+  var rnds8 = new Uint8Array(16);
+  function rng() {
+    if (!getRandomValues) {
+      if (typeof crypto === "undefined" || !crypto.getRandomValues) {
+        throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+      }
+      getRandomValues = crypto.getRandomValues.bind(crypto);
+    }
+    return getRandomValues(rnds8);
+  }
+
+  // node_modules/uuid/dist/esm-browser/native.js
+  var randomUUID = typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+  var native_default = { randomUUID };
+
+  // node_modules/uuid/dist/esm-browser/v4.js
+  function v4(options, buf, offset) {
+    if (native_default.randomUUID && !buf && !options) {
+      return native_default.randomUUID();
+    }
+    options = options || {};
+    const rnds = options.random ?? options.rng?.() ?? rng();
+    if (rnds.length < 16) {
+      throw new Error("Random bytes length must be >= 16");
+    }
+    rnds[6] = rnds[6] & 15 | 64;
+    rnds[8] = rnds[8] & 63 | 128;
+    if (buf) {
+      offset = offset || 0;
+      if (offset < 0 || offset + 16 > buf.length) {
+        throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+      }
+      for (let i = 0; i < 16; ++i) {
+        buf[offset + i] = rnds[i];
+      }
+      return buf;
+    }
+    return unsafeStringify(rnds);
+  }
+  var v4_default = v4;
+
   // assets/js/components/PhotoModal.jsx
   var import_react = __toESM(require_react());
 
@@ -24775,19 +24827,16 @@
     }, []);
     const handleFileChange = async (e) => {
       const file = e.target.files?.[0];
-      if (file) {
-        if (!file.type.startsWith("image/")) {
-          alert("\u041C\u043E\u0436\u043D\u043E \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0442\u044C \u0442\u043E\u043B\u044C\u043A\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F.");
-          return;
-        }
+      if (file && file.type.startsWith("image/")) {
         const reader = new FileReader();
-        reader.addEventListener("load", () => {
+        reader.onload = () => {
           setImageSrc(reader.result);
           setCrop({ x: 0, y: 0 });
           setZoom(1);
-          setCroppedAreaPixels(null);
-        });
+        };
         reader.readAsDataURL(file);
+      } else {
+        alert("\u041C\u043E\u0436\u043D\u043E \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0442\u044C \u0442\u043E\u043B\u044C\u043A\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F.");
       }
     };
     const handleSave = async () => {
@@ -24808,9 +24857,7 @@
           },
           body: formData
         });
-        if (!response.ok) {
-          throw new Error("\u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u0432 WordPress");
-        }
+        if (!response.ok) throw new Error("\u041E\u0448\u0438\u0431\u043A\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438");
         const data = await response.json();
         onComplete({
           id: data.id,
@@ -24819,8 +24866,8 @@
         });
         setImageSrc(null);
       } catch (err) {
-        console.error("Upload error:", err);
-        alert("\u041E\u0448\u0438\u0431\u043A\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+        console.error(err);
+        alert("\u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
       } finally {
         setIsSaving(false);
       }
@@ -24828,10 +24875,7 @@
     const handleDrop = (e) => {
       e.preventDefault();
       const file = e.dataTransfer.files?.[0];
-      if (file) {
-        const event = { target: { files: [file] } };
-        handleFileChange(event);
-      }
+      if (file) handleFileChange({ target: { files: [file] } });
     };
     (0, import_react.useEffect)(() => {
       const handleKey = (e) => {
@@ -24847,22 +24891,28 @@
         onDrop: handleDrop,
         onDragOver: (e) => e.preventDefault()
       },
-      /* @__PURE__ */ import_react.default.createElement("button", { onClick: onClose, className: "absolute top-2 right-2 text-black" }, "\u2715"),
-      /* @__PURE__ */ import_react.default.createElement("h3", { className: "font-bold text-center text-xl" }, "Upload your files"),
-      /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center font-light" }, "Files can be JPG, JPEG or PNG"),
-      /* @__PURE__ */ import_react.default.createElement("p", { className: "mb-2 text-center" }, "Photo ", currentIndex, " from ", total),
-      !imageSrc && /* @__PURE__ */ import_react.default.createElement("div", { className: "border-dashed border-2 border-gray-300 p-4 text-center" }, /* @__PURE__ */ import_react.default.createElement("p", { className: "mb-2" }, "Drag & Drop file here"), /* @__PURE__ */ import_react.default.createElement("div", { className: "mb-4" }, "or"), /* @__PURE__ */ import_react.default.createElement("label", { className: "bg-teal-500 text-white hover:bg-teal-600 w-full p-2 cursor-pointer", htmlFor: "upload-photo" }, "Browse for file "), /* @__PURE__ */ import_react.default.createElement(
-        "input",
+      /* @__PURE__ */ import_react.default.createElement("button", { onClick: onClose, className: "absolute top-2 right-2" }, "\u2715"),
+      /* @__PURE__ */ import_react.default.createElement("h3", { className: "font-bold text-center text-xl" }, "Upload your photo"),
+      /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center font-light mb-2" }, "JPG, JPEG \u0438\u043B\u0438 PNG"),
+      /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center mb-4" }, "Photo ", currentIndex, " from ", total),
+      !imageSrc ? /* @__PURE__ */ import_react.default.createElement(
+        "div",
         {
-          type: "file",
-          accept: "image/*",
-          onChange: handleFileChange,
-          ref: fileInputRef,
-          className: "mx-auto hidden",
-          id: "upload-photo"
-        }
-      )),
-      imageSrc && /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement("div", { className: "relative w-full h-96 bg-gray-200" }, /* @__PURE__ */ import_react.default.createElement(
+          className: "border-dashed border-2 border-gray-300 p-4 text-center text-sm cursor-pointer",
+          onClick: () => fileInputRef.current?.click()
+        },
+        "Drag and drop an image or click to select one.",
+        /* @__PURE__ */ import_react.default.createElement(
+          "input",
+          {
+            type: "file",
+            accept: "image/*",
+            onChange: handleFileChange,
+            ref: fileInputRef,
+            className: "hidden"
+          }
+        )
+      ) : /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement("div", { className: "relative w-full h-64 bg-gray-100" }, /* @__PURE__ */ import_react.default.createElement(
         Cropper,
         {
           image: imageSrc,
@@ -24873,20 +24923,30 @@
           onZoomChange: setZoom,
           onCropComplete
         }
+      )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between items-center mt-4" }, /* @__PURE__ */ import_react.default.createElement(
+        "input",
+        {
+          type: "range",
+          min: 1,
+          max: 3,
+          step: 0.1,
+          value: zoom,
+          onChange: (e) => setZoom(e.target.value),
+          className: "w-full"
+        }
       )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between mt-4" }, /* @__PURE__ */ import_react.default.createElement(
         "button",
         {
-          onClick: onClose,
-          disabled: isSaving,
-          className: "px-4 py-2 bg-gray-300"
+          onClick: () => setImageSrc(null),
+          className: "bg-gray-200 px-4 py-2"
         },
         "Cancel"
       ), /* @__PURE__ */ import_react.default.createElement(
         "button",
         {
           onClick: handleSave,
-          disabled: isSaving,
-          className: `px-4 py-2 text-white ${isSaving ? "bg-blue-300" : "bg-blue-500"}`
+          className: "bg-blue-600 text-white px-4 py-2",
+          disabled: isSaving
         },
         isSaving ? "Saving..." : "Save"
       )))
@@ -24898,7 +24958,7 @@
     const [quantity, setQuantity] = (0, import_react2.useState)(1);
     const [uploadedPhotos, setUploadedPhotos] = (0, import_react2.useState)([]);
     const [showModal, setShowModal] = (0, import_react2.useState)(false);
-    const requiredPhotos = quantity * 9;
+    const requiredPhotos = quantity * 2;
     (0, import_react2.useEffect)(() => {
       const input = document.querySelector(".mag-quantity");
       const plusBtn = document.querySelector("#increase-number");
@@ -24911,12 +24971,8 @@
       };
       input?.addEventListener("input", updateQuantity);
       input?.addEventListener("change", updateQuantity);
-      plusBtn?.addEventListener("click", () => {
-        setTimeout(updateQuantity, 0);
-      });
-      minusBtn?.addEventListener("click", () => {
-        setTimeout(updateQuantity, 0);
-      });
+      plusBtn?.addEventListener("click", () => setTimeout(updateQuantity, 0));
+      minusBtn?.addEventListener("click", () => setTimeout(updateQuantity, 0));
       updateQuantity();
       return () => {
         input?.removeEventListener("input", updateQuantity);
@@ -24926,87 +24982,59 @@
       };
     }, []);
     (0, import_react2.useEffect)(() => {
-      const addToCartBtn = document.querySelector("#lone-add-to-cart");
-      const alertMsg = document.querySelector(".lone-alert");
-      const handleClick = (e) => {
-        if (uploadedPhotos.length < requiredPhotos) {
-          e.preventDefault();
-          alertMsg.classList.add("warn");
-          alertMsg.innerHTML = `<div class="py-2"> \u26A0\uFE0F Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You\u2019ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
-        } else {
-          alertMsg.classList.remove("warn");
-          alertMsg.classList.add("success");
-          alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b>. </div>`;
-        }
-      };
-      if (addToCartBtn) {
-        addToCartBtn.addEventListener("click", handleClick);
-      }
-      return () => {
-        if (addToCartBtn) {
-          addToCartBtn.removeEventListener("click", handleClick);
-        }
-      };
-    }, [uploadedPhotos, requiredPhotos]);
-    (0, import_react2.useEffect)(() => {
-      const alertMsg = document.querySelector(".lone-alert");
-      if (alertMsg && alertMsg.classList.contains("warn") && uploadedPhotos.length < requiredPhotos) {
-        alertMsg.innerHTML = `<div class="py-2"> \u26A0\uFE0F Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You\u2019ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
-      }
-      if (alertMsg && uploadedPhotos.length >= requiredPhotos && alertMsg.classList.contains("warn")) {
-        alertMsg.classList.remove("warn");
-        alertMsg.classList.add("success");
-        alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
-      }
-    }, [uploadedPhotos, requiredPhotos]);
-    const handlePhotoComplete = async (blob) => {
-      if (!blob) return;
-      const file = new File([blob], "photo.jpg", {
-        type: blob.type || "image/jpeg"
-        // если есть type
-      });
-      const formData = new FormData();
-      formData.append("action", "upload_user_photo");
-      formData.append("photo", file);
-      try {
-        const response = await fetch("/wp-admin/admin-ajax.php", {
-          method: "POST",
-          body: formData
-        });
-        const result = await response.json();
-        if (result.success) {
-          const newPhotos = [...uploadedPhotos, result.data.url];
-          setUploadedPhotos(newPhotos);
-          sessionStorage.setItem("magnet_photos", JSON.stringify(newPhotos));
-          if (newPhotos.length >= requiredPhotos) {
-            setShowModal(false);
-          }
-        } else {
-          console.error("Upload error:", result.data.message);
-        }
-      } catch (error) {
-        console.error("Upload failed:", error);
-      }
-    };
-    (0, import_react2.useEffect)(() => {
       const saved = sessionStorage.getItem("magnet_photos");
       if (saved) {
         setUploadedPhotos(JSON.parse(saved));
       }
     }, []);
     (0, import_react2.useEffect)(() => {
+      const addToCartBtn = document.querySelector("#lone-add-to-cart");
+      const alertMsg = document.querySelector(".lone-alert");
+      const handleClick = (e) => {
+        if (uploadedPhotos.length < requiredPhotos) {
+          e.preventDefault();
+          alertMsg?.classList.remove("success");
+          alertMsg?.classList.add("warn");
+          alertMsg.innerHTML = `<div class="py-2">\u26A0\uFE0F Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You\u2019ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
+        } else {
+          alertMsg?.classList.remove("warn");
+          alertMsg?.classList.add("success");
+          alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
+        }
+      };
+      addToCartBtn?.addEventListener("click", handleClick);
+      return () => {
+        addToCartBtn?.removeEventListener("click", handleClick);
+      };
+    }, [uploadedPhotos, requiredPhotos]);
+    (0, import_react2.useEffect)(() => {
+      const alertMsg = document.querySelector(".lone-alert");
+      if (uploadedPhotos.length === requiredPhotos && alertMsg) {
+        alertMsg.classList.remove("warn");
+        alertMsg.classList.add("success");
+        alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
+      }
+    }, [uploadedPhotos, requiredPhotos]);
+    const handlePhotoComplete = (uploaded) => {
+      const newPhoto = { id: v4_default(), url: uploaded.url };
+      const newPhotos = [...uploadedPhotos, newPhoto];
+      setUploadedPhotos(newPhotos);
+      sessionStorage.setItem("magnet_photos", JSON.stringify(newPhotos));
+    };
+    const handleRemovePhoto = (id) => {
+      const updated = uploadedPhotos.filter((photo) => photo.id !== id);
+      setUploadedPhotos(updated);
+      sessionStorage.setItem("magnet_photos", JSON.stringify(updated));
+    };
+    (0, import_react2.useEffect)(() => {
       const uploadBtn = document.querySelector("#custom-photo-upload");
       const handleUploadClick = (e) => {
         e.preventDefault();
         setShowModal(true);
       };
-      if (uploadBtn) {
-        uploadBtn.addEventListener("click", handleUploadClick);
-      }
+      uploadBtn?.addEventListener("click", handleUploadClick);
       return () => {
-        if (uploadBtn) {
-          uploadBtn.removeEventListener("click", handleUploadClick);
-        }
+        uploadBtn?.removeEventListener("click", handleUploadClick);
       };
     }, []);
     return /* @__PURE__ */ import_react2.default.createElement(import_react2.default.Fragment, null, showModal && uploadedPhotos.length < requiredPhotos && /* @__PURE__ */ import_react2.default.createElement(
@@ -25017,7 +25045,21 @@
         onComplete: handlePhotoComplete,
         onClose: () => setShowModal(false)
       }
-    ));
+    ), uploadedPhotos.length > 0 && /* @__PURE__ */ import_react2.default.createElement("div", { className: "mt-4" }, /* @__PURE__ */ import_react2.default.createElement("h3", { className: "mb-2 text-sm font-light" }, "Uploaded Photos"), /* @__PURE__ */ import_react2.default.createElement("div", { className: "grid grid-cols-3 gap-4" }, uploadedPhotos.map((photo) => /* @__PURE__ */ import_react2.default.createElement("div", { key: photo.id, className: "relative" }, /* @__PURE__ */ import_react2.default.createElement(
+      "img",
+      {
+        src: photo.url,
+        alt: "Uploaded",
+        className: "w-full h-auto border"
+      }
+    ), /* @__PURE__ */ import_react2.default.createElement(
+      "button",
+      {
+        onClick: () => handleRemovePhoto(photo.id),
+        className: "absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+      },
+      "\u2715"
+    ))))));
   };
   var container = document.getElementById("custom-photo-modal-root");
   if (container) {

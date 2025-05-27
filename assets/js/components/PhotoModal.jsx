@@ -16,20 +16,16 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Можно загружать только изображения.");
-        return;
-      }
-
+    if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
-      reader.addEventListener("load", () => {
+      reader.onload = () => {
         setImageSrc(reader.result);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
-        setCroppedAreaPixels(null);
-      });
+      };
       reader.readAsDataURL(file);
+    } else {
+      alert("Можно загружать только изображения.");
     }
   };
 
@@ -54,9 +50,7 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Ошибка при загрузке изображения в WordPress");
-      }
+      if (!response.ok) throw new Error("Ошибка загрузки");
 
       const data = await response.json();
 
@@ -68,8 +62,8 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
 
       setImageSrc(null);
     } catch (err) {
-      console.error("Upload error:", err);
-      alert("Ошибка загрузки изображения. Попробуйте снова.");
+      console.error(err);
+      alert("Ошибка при загрузке изображения. Попробуйте снова.");
     } finally {
       setIsSaving(false);
     }
@@ -78,10 +72,7 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file) {
-      const event = { target: { files: [file] } };
-      handleFileChange(event);
-    }
+    if (file) handleFileChange({ target: { files: [file] } });
   };
 
   useEffect(() => {
@@ -99,32 +90,29 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
       >
-        <button onClick={onClose} className="absolute top-2 right-2 text-black">✕</button>
+        <button onClick={onClose} className="absolute top-2 right-2">✕</button>
 
-        <h3 className="font-bold text-center text-xl">Upload your files</h3>
-        <p className="text-center font-light">Files can be JPG, JPEG or PNG</p>
+        <h3 className="font-bold text-center text-xl">Upload your photo</h3>
+        <p className="text-center font-light mb-2">JPG, JPEG или PNG</p>
+        <p className="text-center mb-4">Photo {currentIndex} from {total}</p>
 
-        <p className="mb-2 text-center">Photo {currentIndex} from {total}</p>
-
-        {!imageSrc && (
-          <div className="border-dashed border-2 border-gray-300 p-4 text-center">
-            <p className="mb-2">Drag & Drop file here</p>
-            <div className="mb-4">or</div> 
-            <label className="bg-teal-500 text-white hover:bg-teal-600 w-full p-2 cursor-pointer" htmlFor="upload-photo">Browse for file </label>
+        {!imageSrc ? (
+          <div
+            className="border-dashed border-2 border-gray-300 p-4 text-center text-sm cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Drag and drop an image or click to select one.
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
               ref={fileInputRef}
-              className="mx-auto hidden"
-              id="upload-photo"
+              className="hidden"
             />
           </div>
-        )}
-
-        {imageSrc && (
+        ) : (
           <>
-            <div className="relative w-full h-96 bg-gray-200">
+            <div className="relative w-full h-64 bg-gray-100">
               <Cropper
                 image={imageSrc}
                 crop={crop}
@@ -135,18 +123,28 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
                 onCropComplete={onCropComplete}
               />
             </div>
+            <div className="flex justify-between items-center mt-4">
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(e.target.value)}
+                className="w-full"
+              />
+            </div>
             <div className="flex justify-between mt-4">
               <button
-                onClick={onClose}
-                disabled={isSaving}
-                className="px-4 py-2 bg-gray-300"
+                onClick={() => setImageSrc(null)}
+                className="bg-gray-200 px-4 py-2"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
+                className="bg-blue-600 text-white px-4 py-2"
                 disabled={isSaving}
-                className={`px-4 py-2 text-white ${isSaving ? "bg-blue-300" : "bg-blue-500"}`}
               >
                 {isSaving ? "Saving..." : "Save"}
               </button>

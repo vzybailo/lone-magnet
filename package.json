@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tailwindcss -i ./assets/css/style.css -o ./dist/style.css --watch",
-    "build:js": "esbuild assets/js/photo-upload.jsx --bundle --outfile=assets/js/photo-upload.js --loader:.jsx=jsx",
-    "build-blocks": "wp-scripts build blocks/photo-upload/index.js --output-path=blocks/photo-upload/build --output-filename=index.js"
+    "build:js": "esbuild assets/js/photo-upload.jsx --bundle --outfile=assets/js/photo-upload.js --loader:.jsx=jsx"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +25,7 @@
     "@wordpress/scripts": "^30.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-easy-crop": "^5.4.1"
+    "react-easy-crop": "^5.4.1",
+    "uuid": "^11.1.0"
   }
 }

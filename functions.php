@@ -43,13 +43,6 @@ function lone_setup_theme() {
 }
 add_action('after_setup_theme', 'lone_setup_theme');
 
-// register new Gutenberg blocks
-function magnets_shop_register_blocks() {
-    register_block_type(__DIR__ . '/blocks/cta');
-    register_block_type(__DIR__ . '/blocks/photo-upload');
-}
-add_action('init', 'magnets_shop_register_blocks');
-
 // add upload button
 function render_custom_upload_button() {
     echo '<button type="button" class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
@@ -62,7 +55,7 @@ function enqueue_custom_photo_upload_script() {
     wp_enqueue_script(
         'photo-upload',
         get_template_directory_uri() . '/assets/js/photo-upload.js',
-        array('wp-element'), // React dependencies
+        [], // React dependencies
         null,
         true
     );
@@ -115,4 +108,3 @@ function upload_user_photo() {
 
     wp_die();
 }
-
