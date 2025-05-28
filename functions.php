@@ -45,8 +45,11 @@ add_action('after_setup_theme', 'lone_setup_theme');
 
 // add upload button
 function render_custom_upload_button() {
+    global $product;
+    $product_id = $product->get_id();
+
     echo '<button type="button" class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
-    echo '<div id="custom-photo-modal-root"></div>';
+    echo '<div id="custom-photo-modal-root" data-product-id="' . esc_attr($product_id) . '"></div>';
     echo '<div class="lone-alert text-sm"></div>';
 }
 add_action('woocommerce_before_add_to_cart_button', 'render_custom_upload_button');

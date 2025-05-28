@@ -8,6 +8,10 @@ const PhotoUploadApp = () => {
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
+  const container = document.getElementById("custom-photo-modal-root");
+  const productId = container?.dataset?.productId || "unknown";
+  const STORAGE_KEY = `magnet_photos_product_${productId}`;
+
   const requiredPhotos = quantity * 2;
 
   useEffect(() => {
@@ -38,11 +42,11 @@ const PhotoUploadApp = () => {
   }, []);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem("magnet_photos");
+    const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
       setUploadedPhotos(JSON.parse(saved));
     }
-  }, []);
+  }, [STORAGE_KEY]);
 
   useEffect(() => {
     const addToCartBtn = document.querySelector("#lone-add-to-cart");
@@ -55,6 +59,9 @@ const PhotoUploadApp = () => {
         alertMsg?.classList.add("warn");
         alertMsg.innerHTML = `<div class="py-2">⚠️ Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You’ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
       } else {
+        sessionStorage.removeItem(STORAGE_KEY);
+        setUploadedPhotos([]);
+        
         alertMsg?.classList.remove("warn");
         alertMsg?.classList.add("success");
         alertMsg.innerHTML = `<div class="py-2">✅ You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
@@ -78,18 +85,17 @@ const PhotoUploadApp = () => {
     }
   }, [uploadedPhotos, requiredPhotos]);
 
-
   const handlePhotoComplete = (uploaded) => {
     const newPhoto = { id: uuid(), url: uploaded.url };
     const newPhotos = [...uploadedPhotos, newPhoto];
     setUploadedPhotos(newPhotos);
-    sessionStorage.setItem("magnet_photos", JSON.stringify(newPhotos));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newPhotos));
   };
 
   const handleRemovePhoto = (id) => {
     const updated = uploadedPhotos.filter((photo) => photo.id !== id);
     setUploadedPhotos(updated);
-    sessionStorage.setItem("magnet_photos", JSON.stringify(updated));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
 
   useEffect(() => {
@@ -145,7 +151,11 @@ const PhotoUploadApp = () => {
 };
 
 const container = document.getElementById("custom-photo-modal-root");
+
 if (container) {
+  container.innerHTML = ""; // Очистить старое содержимое, если было
+  const productId = container.dataset.productId || "unknown";
   const root = createRoot(container);
-  root.render(<PhotoUploadApp />);
+  root.render(<PhotoUploadApp productId={productId} />);
 }
+
