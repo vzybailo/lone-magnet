@@ -79,11 +79,38 @@ document.addEventListener('DOMContentLoaded', function () {
 })
 
 // burger menu
+document.addEventListener('DOMContentLoaded', () => {
+  const burgerBtn = document.getElementById('burger-btn')
+  const burgerMenu = document.getElementById('burger-menu')
+  const lines = burgerBtn.querySelectorAll('.burger-line')
+  const header = document.querySelector('.header')
+  const adminBar = document.getElementById('wpadminbar')
+  const adminBarHeight = adminBar ? adminBar.offsetHeight : 0
+  const headerHeight = header.offsetHeight + adminBarHeight
 
-    // const burgerBtn = document.querySelector('#burger-btn')
-    // const burgerMenu = document.querySelector('#burger-menu')
+  console.log(headerHeight)
 
-    // burgerBtn.addEventListener('click', () => {
-    //     burgerMenu.classList.toggle('hidden')
-    // })
+  burgerBtn.addEventListener('click', () => {
+    const isOpen = burgerMenu.classList.contains('translate-x-0')
+    burgerMenu.style.top = `${headerHeight}px`
+
+    if (isOpen) {
+      burgerMenu.classList.remove('translate-x-0')
+      burgerMenu.classList.add('-translate-x-full')
+      document.body.classList.remove('overflow-hidden')
+
+      lines[0].classList.remove('rotate-45', 'translate-y-1.5')
+      lines[1].classList.remove('opacity-0')
+      lines[2].classList.remove('-rotate-45', '-translate-y-1.5')
+    } else {
+      burgerMenu.classList.remove('-translate-x-full')
+      burgerMenu.classList.add('translate-x-0')
+      document.body.classList.add('overflow-hidden')
+
+      lines[0].classList.add('rotate-45', 'translate-y-1.5')
+      lines[1].classList.add('opacity-0')
+      lines[2].classList.add('-rotate-45', '-translate-y-1.5')
+    }
+  })
+})
 

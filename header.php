@@ -6,9 +6,9 @@
   <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
-  <header class="border-b">
-    <div class="bg-gray-800 text-white text-center text-sm py-2">🚚✈️ FREE SHIPPING on US orders over $40</div>
-    <div class="container mx-auto flex justify-between items-center py-8 max-sm:px-4">
+  <header class="header border-b">
+    <div class="bg-gray-800 text-white text-center text-xs py-2">🚚✈️ FREE SHIPPING on US orders over $40</div>
+    <div class="container mx-auto flex justify-between items-center py-8 max-sm:px-4 max-sm:py-4">
       <a href="<?php echo esc_url(home_url('/')); ?>" class="flex items-center">
         <?php 
           if (has_custom_logo()) {
@@ -31,11 +31,18 @@
               <?php echo WC()->cart->get_cart_contents_count(); ?>
             </span>
           </a>
-          <div id="burger-btn" class="flex flex-col hidden cursor-pointer max-sm:flex">
-            <span class="bg-black w-[26px] h-[2px] mb-1"></span>
-            <span class="bg-black w-[26px] h-[2px] mb-1"></span>
-            <span class="bg-black w-[26px] h-[2px] mb-1 last:mb-0"></span>
+          <div id="burger-btn" class="flex flex-col justify-center items-center w-8 h-8 cursor-pointer z-30 relative max-sm:flex hidden">
+            <span class="burger-line w-6 h-[2px] bg-black mb-1 transition-all duration-300"></span>
+            <span class="burger-line w-6 h-[2px] bg-black mb-1 transition-all duration-300"></span>
+            <span class="burger-line w-6 h-[2px] bg-black transition-all duration-300"></span>
           </div>
+
+          <div id="burger-menu" class="fixed left-0 h-screen w-2/3 max-w-xs bg-white shadow-lg -translate-x-full transition-transform duration-300 ease-in-out z-20">
+            <nav class="flex flex-col items-start gap-4 p-6 font-light">
+              <?php wp_nav_menu(['theme_location' => 'header-menu', 'menu_class' => 'flex flex-col gap-4']); ?>
+            </nav>
+          </div>
+
         </div>
       <?php endif; ?>
     </div>

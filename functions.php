@@ -150,10 +150,10 @@ add_action('woocommerce_after_order_itemmeta', 'show_uploaded_photos_in_admin', 
 function show_uploaded_photos_in_admin($item_id, $item, $product) {
     $photos = wc_get_order_item_meta($item_id, 'magnet_photos');
     if (is_array($photos) && !empty($photos)) {
-        echo '<div><strong>Uploaded photos:</strong><br>';
+        echo '<div><strong">Uploaded photos:</strong><br>';
         foreach ($photos as $photo) {
             if (isset($photo['url'])) {
-                echo '<img src="' . esc_url($photo['url']) . '" style="max-width: 80px; margin: 5px; border: 1px solid #ccc;" />';
+                echo '<img src="' . esc_url($photo['url']) . '" style="max-width: 80px; margin: 5px 5px 0 0; border: 1px solid #ccc;" />';
             }
         }
         echo '</div>';
