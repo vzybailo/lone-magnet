@@ -53,6 +53,12 @@ const PhotoUploadApp = () => {
     const alertMsg = document.querySelector(".lone-alert");
 
     const handleClick = (e) => {
+      const hiddenInput = document.querySelector("#magnet_photos_data");
+      
+      if (hiddenInput) {
+        hiddenInput.value = JSON.stringify(uploadedPhotos);
+      }
+
       if (uploadedPhotos.length < requiredPhotos) {
         e.preventDefault();
         alertMsg?.classList.remove("success");

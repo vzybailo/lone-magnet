@@ -10,7 +10,7 @@ if (!comments_open()) {
 <div id="reviews" class="woocommerce-Reviews mt-12">
 
   <!-- Reviews Title -->
-  <h2 class="text-2xl font-semibold text-center">
+  <h2 class="text-2xl font-semibold text-center max-sm:text-xl">
     <?php
     $count = $product->get_review_count();
     echo $count ? 'What Our Customers Are Saying' : 'No reviews yet';

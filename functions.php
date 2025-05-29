@@ -58,7 +58,7 @@ function enqueue_custom_photo_upload_script() {
     wp_enqueue_script(
         'photo-upload',
         get_template_directory_uri() . '/assets/js/photo-upload.js',
-        [], // React dependencies
+        [],
         null,
         true
     );
@@ -111,3 +111,105 @@ function upload_user_photo() {
 
     wp_die();
 }
+
+// Сохраняем фото в объект корзины
+add_filter('woocommerce_add_cart_item_data', 'save_uploaded_photos_to_cart', 10, 3);
+function save_uploaded_photos_to_cart($cart_item_data, $product_id, $variation_id) {
+    if (isset($_POST['magnet_photos_data'])) {
+        $photos = json_decode(stripslashes($_POST['magnet_photos_data']), true);
+        if (is_array($photos)) {
+            $cart_item_data['magnet_photos'] = $photos;
+            $cart_item_data['unique_key'] = md5(microtime().rand()); 
+        }
+    }
+    return $cart_item_data;
+}
+
+add_filter('woocommerce_get_item_data', 'display_photos_in_cart', 10, 2);
+function display_photos_in_cart($item_data, $cart_item) {
+    if (isset($cart_item['magnet_photos'])) {
+        $photos = $cart_item['magnet_photos'];
+        $item_data[] = array(
+            'key' => __('Uploaded Photos', 'your-textdomain'),
+            'value' => sprintf('%d photo(s) uploaded', count($photos))
+        );
+    }
+    return $item_data;
+}
+
+add_action('woocommerce_checkout_create_order_line_item', 'save_photos_to_order', 10, 4);
+function save_photos_to_order($item, $cart_item_key, $values, $order) {
+    if (isset($values['magnet_photos'])) {
+        $item->add_meta_data('magnet_photos', $values['magnet_photos'], true);
+    }
+}
+
+add_action('woocommerce_after_order_itemmeta', 'show_uploaded_photos_in_admin', 10, 3);
+
+// показываем миниатюры загруженных фото в заказе в админке
+function show_uploaded_photos_in_admin($item_id, $item, $product) {
+    $photos = wc_get_order_item_meta($item_id, 'magnet_photos');
+    if (is_array($photos) && !empty($photos)) {
+        echo '<div><strong>Uploaded photos:</strong><br>';
+        foreach ($photos as $photo) {
+            if (isset($photo['url'])) {
+                echo '<img src="' . esc_url($photo['url']) . '" style="max-width: 80px; margin: 5px; border: 1px solid #ccc;" />';
+            }
+        }
+        echo '</div>';
+    }
+}
+
+// формируем архив фото для скачивания в заказе
+add_action('woocommerce_thankyou', 'generate_zip_for_order', 20);
+function generate_zip_for_order($order_id) {
+    if (!$order_id) return;
+
+    $order = wc_get_order($order_id);
+
+    // Пропустить, если ZIP уже создан
+    if ($order->get_meta('magnet_zip_url')) {
+        return;
+    }
+
+    $zip = new ZipArchive();
+    $upload_dir = wp_upload_dir();
+    $zip_path = $upload_dir['basedir'] . "/order_zips/order-{$order_id}.zip";
+
+    if (!file_exists(dirname($zip_path))) {
+        wp_mkdir_p(dirname($zip_path));
+    }
+
+    if ($zip->open($zip_path, ZipArchive::CREATE) === TRUE) {
+        foreach ($order->get_items() as $item_id => $item) {
+            $photos = wc_get_order_item_meta($item_id, 'magnet_photos');
+            if (is_array($photos)) {
+                foreach ($photos as $photo) {
+                    $photo_url = $photo['url'];
+                    if ($photo_contents = @file_get_contents($photo_url)) {
+                        $file_name = basename(parse_url($photo_url, PHP_URL_PATH));
+                        $zip->addFromString("{$item_id}_{$file_name}", $photo_contents);
+                    }
+                }
+            }
+        }
+        $zip->close();
+
+        $zip_url = $upload_dir['baseurl'] . "/order_zips/order-{$order_id}.zip";
+        $order->update_meta_data('magnet_zip_url', esc_url_raw($zip_url));
+        $order->save();
+    }
+}
+
+// добавляем к заказу кнопку для скачивания фото 
+add_action('woocommerce_admin_order_data_after_order_details', function($order) {
+    $zip_url = $order->get_meta('magnet_zip_url');
+    if ($zip_url) {
+        echo '
+            <div class="form-field form-field-wide">
+                <div style="color: #777; padding: 0 0 3px;">Photos for printing:</div>
+                <a href="' . esc_url($zip_url) . '" target="_blank" class="button">Download ZIP</a>
+            </div>';
+    }
+});
+
