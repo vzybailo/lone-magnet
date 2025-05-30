@@ -24964,7 +24964,7 @@
     const container2 = document.getElementById("custom-photo-modal-root");
     const productId = container2?.dataset?.productId || "unknown";
     const STORAGE_KEY = `magnet_photos_product_${productId}`;
-    const requiredPhotos = quantity * 9;
+    const requiredPhotos = quantity * 2;
     (0, import_react2.useEffect)(() => {
       const input = document.querySelector(".mag-quantity");
       const plusBtn = document.querySelector("#increase-number");
@@ -25005,11 +25005,16 @@
         sessionStorage.setItem("showMsg", "true");
         if (uploadedPhotos.length < requiredPhotos) {
           e.preventDefault();
+          return;
         }
         if (uploadedPhotos.length === 0) {
           alertMsg.innerHTML = `<div class="py-2 warn">
         \u26A0\uFE0F You haven\u2019t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order. </div>`;
+          return;
         }
+        sessionStorage.removeItem(STORAGE_KEY);
+        setShowMsg(false);
+        if (alertMsg) alertMsg.innerHTML = "";
       };
       addToCartBtn?.addEventListener("click", handleClick);
       return () => {
@@ -25040,7 +25045,7 @@
         Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
       </div>`;
       } else {
-        const maxItems = Math.floor(uploadedPhotos.length / 9);
+        const maxItems = Math.floor(uploadedPhotos.length / 2);
         const extra = uploadedPhotos.length - requiredPhotos;
         addClass("warn");
         alertMsg.innerHTML = `<div class="py-2">

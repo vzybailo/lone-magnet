@@ -213,3 +213,56 @@ add_action('woocommerce_admin_order_data_after_order_details', function($order) 
     }
 });
 
+
+function send_telegram_order_notification($order_id) {
+    $order = wc_get_order($order_id);
+    if (!$order) {
+        error_log("❌ Order not found for ID: $order_id");
+        return;
+    }
+
+    $token = '8006365032:AAEJL-G1oIK8XvEMi5AIBvD-ixnxqHyAp0Y';
+    $chat_id = '-1002631629170'; 
+
+    $message = "🛒 Новый заказ №{$order_id}\n";
+    $message .= "Клиент: " . $order->get_billing_first_name() . " " . $order->get_billing_last_name() . "\n";
+    $message .= "Телефон: " . $order->get_billing_phone() . "\n";
+    $message .= "Email: " . $order->get_billing_email() . "\n";
+    $message .= "Товары:\n";
+
+    foreach ($order->get_items() as $item) {
+        $product_name = $item->get_name();
+        $qty = $item->get_quantity();
+        $message .= "- {$product_name} x{$qty}\n";
+    }
+
+    $message .= "Итого: " . $order->get_formatted_order_total();
+
+    $url = "https://api.telegram.org/bot{$token}/sendMessage";
+
+    $args = array(
+        'body' => json_encode([
+            'chat_id' => $chat_id,
+            'text' => $message,
+            'parse_mode' => 'HTML',
+        ]),
+        'headers' => array(
+            'Content-Type' => 'application/json',
+        ),
+        'timeout' => 15,
+    );
+
+    // Логируем отправку
+    error_log("📤 Sending Telegram message: $message");
+
+    $response = wp_remote_post($url, $args);
+
+    if (is_wp_error($response)) {
+        error_log('❌ Telegram error: ' . $response->get_error_message());
+    } else {
+        error_log('✅ Telegram sent successfully: ' . wp_remote_retrieve_body($response));
+    }
+}
+add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
+
+
