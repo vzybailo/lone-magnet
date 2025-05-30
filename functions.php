@@ -221,8 +221,8 @@ function send_telegram_order_notification($order_id) {
         return;
     }
 
-    $token = '8006365032:AAEJL-G1oIK8XvEMi5AIBvD-ixnxqHyAp0Y';
-    $chat_id = '-1002631629170'; 
+    $token = '';
+    $chat_id = ''; 
 
     $message = "🛒 Новый заказ №{$order_id}\n";
     $message .= "Клиент: " . $order->get_billing_first_name() . " " . $order->get_billing_last_name() . "\n";
