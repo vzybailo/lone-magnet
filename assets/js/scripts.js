@@ -88,8 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminBarHeight = adminBar ? adminBar.offsetHeight : 0
   const headerHeight = header.offsetHeight + adminBarHeight
 
-  console.log(headerHeight)
-
   burgerBtn.addEventListener('click', () => {
     const isOpen = burgerMenu.classList.contains('translate-x-0')
     burgerMenu.style.top = `${headerHeight}px`

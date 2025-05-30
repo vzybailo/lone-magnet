@@ -24893,7 +24893,7 @@
       },
       /* @__PURE__ */ import_react.default.createElement("button", { onClick: onClose, className: "absolute top-2 right-2" }, "\u2715"),
       /* @__PURE__ */ import_react.default.createElement("h3", { className: "font-bold text-center text-xl" }, "Upload your photo"),
-      /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center font-light mb-2" }, "JPG, JPEG \u0438\u043B\u0438 PNG"),
+      /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center font-light mb-2" }, "JPG, JPEG or PNG"),
       /* @__PURE__ */ import_react.default.createElement("p", { className: "text-center mb-4" }, "Photo ", currentIndex, " from ", total),
       !imageSrc ? /* @__PURE__ */ import_react.default.createElement(
         "div",
@@ -24958,10 +24958,13 @@
     const [quantity, setQuantity] = (0, import_react2.useState)(1);
     const [uploadedPhotos, setUploadedPhotos] = (0, import_react2.useState)([]);
     const [showModal, setShowModal] = (0, import_react2.useState)(false);
+    const [showMsg, setShowMsg] = (0, import_react2.useState)(() => {
+      return sessionStorage.getItem("showMsg") === "true";
+    });
     const container2 = document.getElementById("custom-photo-modal-root");
     const productId = container2?.dataset?.productId || "unknown";
     const STORAGE_KEY = `magnet_photos_product_${productId}`;
-    const requiredPhotos = quantity * 2;
+    const requiredPhotos = quantity * 9;
     (0, import_react2.useEffect)(() => {
       const input = document.querySelector(".mag-quantity");
       const plusBtn = document.querySelector("#increase-number");
@@ -24998,18 +25001,13 @@
         if (hiddenInput) {
           hiddenInput.value = JSON.stringify(uploadedPhotos);
         }
+        setShowMsg(true);
+        sessionStorage.setItem("showMsg", "true");
         if (uploadedPhotos.length < requiredPhotos) {
           e.preventDefault();
-          alertMsg?.classList.remove("success");
-          alertMsg?.classList.add("warn");
-          alertMsg.innerHTML = `<div class="py-2">\u26A0\uFE0F Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You\u2019ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
-        } else {
-          sessionStorage.removeItem(STORAGE_KEY);
-          setUploadedPhotos([]);
-          alertMsg?.classList.remove("warn");
-          alertMsg?.classList.add("success");
-          alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
         }
+        alertMsg.innerHTML = `<div class="py-2 warn">
+        \u26A0\uFE0F You haven\u2019t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order. </div>`;
       };
       addToCartBtn?.addEventListener("click", handleClick);
       return () => {
@@ -25018,12 +25016,37 @@
     }, [uploadedPhotos, requiredPhotos]);
     (0, import_react2.useEffect)(() => {
       const alertMsg = document.querySelector(".lone-alert");
-      if (uploadedPhotos.length === requiredPhotos && alertMsg) {
-        alertMsg.classList.remove("warn");
-        alertMsg.classList.add("success");
-        alertMsg.innerHTML = `<div class="py-2">\u2705 You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
+      if (!alertMsg || !showMsg) return;
+      const addClass = (type) => {
+        alertMsg.classList.remove("warn", "success");
+        alertMsg.classList.add(type);
+      };
+      const remaining = requiredPhotos - uploadedPhotos.length;
+      if (uploadedPhotos.length === 0) {
+        alertMsg.innerHTML = "";
+        return;
       }
-    }, [uploadedPhotos, requiredPhotos]);
+      if (uploadedPhotos.length === requiredPhotos) {
+        addClass("success");
+        alertMsg.innerHTML = `<div class="py-2">
+        \u2705 Great! You\u2019ve uploaded all <b>${requiredPhotos}</b> required photo${requiredPhotos > 1 ? "s" : ""}. You\u2019re good to go!
+      </div>`;
+      } else if (uploadedPhotos.length < requiredPhotos) {
+        addClass("warn");
+        alertMsg.innerHTML = `<div class="py-2">
+        \u26A0\uFE0F You\u2019ve uploaded <b>${uploadedPhotos.length}</b> out of <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}. 
+        Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
+      </div>`;
+      } else {
+        const maxItems = Math.floor(uploadedPhotos.length / 9);
+        const extra = uploadedPhotos.length - requiredPhotos;
+        addClass("warn");
+        alertMsg.innerHTML = `<div class="py-2">
+        \u26A0\uFE0F You\u2019ve uploaded <b>${uploadedPhotos.length}</b> photo${uploadedPhotos.length > 1 ? "s" : ""}, but only <b>${requiredPhotos}</b> are needed for <b>${quantity}</b> item${quantity > 1 ? "s" : ""}.<br/>
+        You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
+      </div>`;
+      }
+    }, [uploadedPhotos, requiredPhotos, quantity, showMsg]);
     const handlePhotoComplete = (uploaded) => {
       const newPhoto = { id: v4_default(), url: uploaded.url };
       const newPhotos = [...uploadedPhotos, newPhoto];
@@ -25039,6 +25062,7 @@
       const uploadBtn = document.querySelector("#custom-photo-upload");
       const handleUploadClick = (e) => {
         e.preventDefault();
+        setShowMsg(true);
         setShowModal(true);
       };
       uploadBtn?.addEventListener("click", handleUploadClick);

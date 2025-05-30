@@ -93,7 +93,7 @@ export default function PhotoModal({ onClose, onComplete, currentIndex, total })
         <button onClick={onClose} className="absolute top-2 right-2">✕</button>
 
         <h3 className="font-bold text-center text-xl">Upload your photo</h3>
-        <p className="text-center font-light mb-2">JPG, JPEG или PNG</p>
+        <p className="text-center font-light mb-2">JPG, JPEG or PNG</p>
         <p className="text-center mb-4">Photo {currentIndex} from {total}</p>
 
         {!imageSrc ? (

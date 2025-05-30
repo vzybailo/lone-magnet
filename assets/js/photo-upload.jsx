@@ -7,12 +7,15 @@ const PhotoUploadApp = () => {
   const [quantity, setQuantity] = useState(1);
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showMsg, setShowMsg] = useState(() => {
+    return sessionStorage.getItem('showMsg') === 'true';
+  });
 
   const container = document.getElementById("custom-photo-modal-root");
   const productId = container?.dataset?.productId || "unknown";
   const STORAGE_KEY = `magnet_photos_product_${productId}`;
 
-  const requiredPhotos = quantity * 2;
+  const requiredPhotos = quantity * 9;
 
   useEffect(() => {
     const input = document.querySelector(".mag-quantity");
@@ -54,42 +57,66 @@ const PhotoUploadApp = () => {
 
     const handleClick = (e) => {
       const hiddenInput = document.querySelector("#magnet_photos_data");
-      
+
       if (hiddenInput) {
         hiddenInput.value = JSON.stringify(uploadedPhotos);
       }
 
+      setShowMsg(true);
+      sessionStorage.setItem('showMsg', 'true');
+
       if (uploadedPhotos.length < requiredPhotos) {
         e.preventDefault();
-        alertMsg?.classList.remove("success");
-        alertMsg?.classList.add("warn");
-        alertMsg.innerHTML = `<div class="py-2">⚠️ Almost there! Please upload <b>${requiredPhotos}</b> photos to complete your order. You’ve uploaded <b>${uploadedPhotos.length}</b> so far.</div>`;
-      } else {
-        sessionStorage.removeItem(STORAGE_KEY);
-        setUploadedPhotos([]);
-        
-        alertMsg?.classList.remove("warn");
-        alertMsg?.classList.add("success");
-        alertMsg.innerHTML = `<div class="py-2">✅ You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
       }
+
+      alertMsg.innerHTML = `<div class="py-2 warn">
+        ⚠️ You haven’t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order. </div>`;
     };
 
     addToCartBtn?.addEventListener("click", handleClick);
-
     return () => {
       addToCartBtn?.removeEventListener("click", handleClick);
     };
   }, [uploadedPhotos, requiredPhotos]);
 
+  // Централизованная логика уведомлений
   useEffect(() => {
     const alertMsg = document.querySelector(".lone-alert");
+    if (!alertMsg || !showMsg) return;
 
-    if (uploadedPhotos.length === requiredPhotos && alertMsg) {
-      alertMsg.classList.remove("warn");
-      alertMsg.classList.add("success");
-      alertMsg.innerHTML = `<div class="py-2">✅ You have successfully uploaded <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.</div>`;
+    const addClass = (type) => {
+      alertMsg.classList.remove("warn", "success");
+      alertMsg.classList.add(type);
+    };
+
+    const remaining = requiredPhotos - uploadedPhotos.length;
+
+    if (uploadedPhotos.length === 0) {
+      alertMsg.innerHTML = "";
+      return;
     }
-  }, [uploadedPhotos, requiredPhotos]);
+
+    if (uploadedPhotos.length === requiredPhotos) {
+      addClass("success");
+      alertMsg.innerHTML = `<div class="py-2">
+        ✅ Great! You’ve uploaded all <b>${requiredPhotos}</b> required photo${requiredPhotos > 1 ? "s" : ""}. You’re good to go!
+      </div>`;
+    } else if (uploadedPhotos.length < requiredPhotos) {
+      addClass("warn");
+      alertMsg.innerHTML = `<div class="py-2">
+        ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> out of <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}. 
+        Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
+      </div>`;
+    } else {
+      const maxItems = Math.floor(uploadedPhotos.length / 9);
+      const extra = uploadedPhotos.length - requiredPhotos;
+      addClass("warn");
+      alertMsg.innerHTML = `<div class="py-2">
+        ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> photo${uploadedPhotos.length > 1 ? "s" : ""}, but only <b>${requiredPhotos}</b> are needed for <b>${quantity}</b> item${quantity > 1 ? "s" : ""}.<br/>
+        You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
+      </div>`;
+    }
+  }, [uploadedPhotos, requiredPhotos, quantity, showMsg]);
 
   const handlePhotoComplete = (uploaded) => {
     const newPhoto = { id: uuid(), url: uploaded.url };
@@ -109,6 +136,7 @@ const PhotoUploadApp = () => {
 
     const handleUploadClick = (e) => {
       e.preventDefault();
+      setShowMsg(true);
       setShowModal(true);
     };
 
@@ -159,7 +187,7 @@ const PhotoUploadApp = () => {
 const container = document.getElementById("custom-photo-modal-root");
 
 if (container) {
-  container.innerHTML = ""; // Очистить старое содержимое, если было
+  container.innerHTML = ""; 
   const productId = container.dataset.productId || "unknown";
   const root = createRoot(container);
   root.render(<PhotoUploadApp productId={productId} />);
