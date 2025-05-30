@@ -69,8 +69,10 @@ const PhotoUploadApp = () => {
         e.preventDefault();
       }
 
-      alertMsg.innerHTML = `<div class="py-2 warn">
+      if (uploadedPhotos.length === 0) {
+          alertMsg.innerHTML = `<div class="py-2 warn">
         ⚠️ You haven’t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order. </div>`;
+      }
     };
 
     addToCartBtn?.addEventListener("click", handleClick);
