@@ -15,7 +15,7 @@ const PhotoUploadApp = () => {
   const productId = container?.dataset?.productId || "unknown";
   const STORAGE_KEY = `magnet_photos_product_${productId}`;
 
-  const requiredPhotos = quantity * 2;
+  const requiredPhotos = quantity * 9;
 
   useEffect(() => {
     const input = document.querySelector(".mag-quantity");
@@ -124,7 +124,7 @@ const PhotoUploadApp = () => {
         Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
       </div>`;
     } else {
-      const maxItems = Math.floor(uploadedPhotos.length / 2);
+      const maxItems = Math.floor(uploadedPhotos.length / 9);
       const extra = uploadedPhotos.length - requiredPhotos;
       addClass("warn");
       alertMsg.innerHTML = `<div class="py-2">

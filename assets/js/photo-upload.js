@@ -24926,7 +24926,7 @@
     const container2 = document.getElementById("custom-photo-modal-root");
     const productId = container2?.dataset?.productId || "unknown";
     const STORAGE_KEY = `magnet_photos_product_${productId}`;
-    const requiredPhotos = quantity * 2;
+    const requiredPhotos = quantity * 9;
     (0, import_react2.useEffect)(() => {
       const input = document.querySelector(".mag-quantity");
       const plusBtn = document.querySelector("#increase-number");
@@ -25013,7 +25013,7 @@
         Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
       </div>`;
       } else {
-        const maxItems2 = Math.floor(uploadedPhotos.length / 2);
+        const maxItems2 = Math.floor(uploadedPhotos.length / 9);
         const extra2 = uploadedPhotos.length - requiredPhotos;
         addClass("warn");
         alertMsg.innerHTML = `<div class="py-2">

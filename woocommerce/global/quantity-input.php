@@ -3,7 +3,7 @@
 $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 'woocommerce' ), wp_strip_all_tags( $args['product_name'] ) ) : esc_html__( 'Quantity', 'woocommerce' );
 
 ?>
-<div class="quantity grid grid-cols-3 items-center border mb-4 w-1/3 max-sm:w-1/2">
+<div class="quantity grid grid-cols-3 items-center border w-1/3 max-sm:w-1/2">
 	<?php
 
 	do_action( 'woocommerce_before_quantity_input_field' );
