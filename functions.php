@@ -269,3 +269,67 @@ add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
 add_filter( 'woocommerce_use_block_template_cart', '__return_false' );
 
 
+// change  product thumnail in the cart
+add_filter('woocommerce_add_cart_item_data', 'save_uploaded_photos_to_cart_item', 10, 3);
+function save_uploaded_photos_to_cart_item($cart_item_data, $product_id, $variation_id) {
+    if (!empty($_POST['magnet_photos_data'])) {
+        $photos = json_decode(stripslashes($_POST['magnet_photos_data']), true);
+        if ($photos && is_array($photos)) {
+            $cart_item_data['magnet_photos'] = $photos;
+            $cart_item_data['unique_key'] = md5(microtime().rand());
+        }
+    }
+    return $cart_item_data;
+}
+
+add_filter('woocommerce_cart_item_thumbnail', 'replace_cart_thumbnail_with_uploaded_photos', 10, 3);
+function replace_cart_thumbnail_with_uploaded_photos($thumbnail, $cart_item, $cart_item_key) {
+    if (!empty($cart_item['magnet_photos'])) {
+        $photos = array_slice($cart_item['magnet_photos'], 0, 9);
+        $grid = '<div class="custom-thumbnail-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; overflow: hidden;">';
+        foreach ($photos as $photo) {
+            $grid .= '<img src="' . esc_url($photo['url']) . '" style="width: 100%; height: auto; object-fit: cover;" />';
+        }
+        $grid .= '</div>';
+        return $grid;
+    }
+    return $thumbnail;
+}
+
+add_filter('woocommerce_get_cart_item_from_session', 'restore_uploaded_photos_from_session', 10, 2);
+function restore_uploaded_photos_from_session($cart_item, $values) {
+    if (isset($values['magnet_photos'])) {
+        $cart_item['magnet_photos'] = $values['magnet_photos'];
+    }
+    return $cart_item;
+}
+
+add_action('woocommerce_add_order_item_meta', function($item_id, $values) {
+    if (!empty($values['magnet_photos'])) {
+        wc_add_order_item_meta($item_id, 'magnet_photos', $values['magnet_photos']);
+    }
+}, 10, 2);
+
+
+
+add_action('wp_ajax_woocommerce_update_cart_item', 'custom_woocommerce_update_cart_item');
+add_action('wp_ajax_nopriv_woocommerce_update_cart_item', 'custom_woocommerce_update_cart_item');
+
+function custom_woocommerce_update_cart_item() {
+    check_ajax_referer('woocommerce-cart', 'security');
+
+    $cart_item_key = sanitize_text_field($_POST['cart_item_key']);
+    $quantity = intval($_POST['quantity']);
+
+    if (WC()->cart->get_cart_item($cart_item_key)) {
+        WC()->cart->set_quantity($cart_item_key, $quantity);
+        WC()->cart->calculate_totals();
+    }
+
+    // Возвращаем обновленные фрагменты корзины
+    WC_AJAX::get_refreshed_fragments();
+
+    wp_die();
+}
+
+

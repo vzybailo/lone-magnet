@@ -8,7 +8,7 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
 
 	do_action( 'woocommerce_before_quantity_input_field' );
 	?>
-    <button type="button" id="decrease-number" class="cursor-pointer text-xl h-full" aria-label="Вуncrease quantity"> - </button>
+    <button type="button" class="decrease-number cursor-pointer text-xl h-full" aria-label="Decrease quantity"> - </button>
     <input
         type="number"
         id="<?php echo esc_attr( $input_id ); ?>"
@@ -19,7 +19,7 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
         step="1"
         aria-label="<?php echo esc_attr( $label ); ?>"
     />
-    <button type="button" id="increase-number" class="cursor-pointer text-xl h-full" aria-label="Increase quantity"> + </button>
+    <button type="button" class="increase-number cursor-pointer text-xl h-full" aria-label="Increase quantity"> + </button>
 	<?php
 
 	do_action( 'woocommerce_after_quantity_input_field' );

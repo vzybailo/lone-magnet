@@ -31,51 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
     quantityInput.addEventListener('change', updatePrice)
 
     updatePrice() 
-
-    // кнопки + и - в инпуте
-
-    const minus = document.querySelector('#decrease-number')
-    const plus = document.querySelector('#increase-number')
-    minus.classList.add('not-allowed')
-
-    quantityInput.addEventListener('input', () => {
-        if (parseInt(quantityInput.value) <= 0 || quantityInput.value === '0') {
-            quantityInput.value = 1
-        }
-    })    
-
-    if (!quantityInput || !minus || !plus) return
-
-    function updateMinusState() {
-        const currentValue = parseInt(quantityInput.value) || 1;
-        if (currentValue <= 1) {
-            minus.classList.add('not-allowed');
-        } else {
-            minus.classList.remove('not-allowed');
-            minus.style.pointerEvents = 'auto';
-        }
-    }
-
-    minus.addEventListener('click', () => {
-        let currentValue = parseInt(quantityInput.value) || 1
-        if (currentValue > 1) {
-            quantityInput.value = currentValue - 1
-            quantityInput.dispatchEvent(new Event('change'))
-        } 
-
-        updateMinusState()
-    })
-
-    plus.addEventListener('click', () => {
-        let currentValue = parseInt(quantityInput.value) || 1
-        quantityInput.value = currentValue + 1
-        quantityInput.dispatchEvent(new Event('change'))
-        minus.classList.remove('not-allowed')
-
-        updateMinusState()
-    })
-
-    updateMinusState()
 })
 
 // burger menu
@@ -112,3 +67,53 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const debounceDelay = 500;
+  let debounceTimer;
+
+  // Находим все поля количества
+  const quantityInputs = document.querySelectorAll('.qty');
+
+  quantityInputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        let qty = parseInt(input.value);
+        if (isNaN(qty) || qty < 1) {
+          qty = 1;
+          input.value = qty;
+        }
+
+        // Симуляция клика по кнопке "Обновить корзину"
+        document.querySelector('[name="update_cart"]')?.click();
+      }, debounceDelay);
+    });
+  });
+
+  // Обработка кнопок + и -
+  document.querySelectorAll('.decrease-number').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const container = btn.closest('.quantity');
+      const input = container?.querySelector('.qty');
+      if (!input) return;
+      let currentQty = parseInt(input.value) || 1;
+      if (currentQty > 1) {
+        input.value = currentQty - 1;
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+  });
+
+  document.querySelectorAll('.increase-number').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const container = btn.closest('.quantity');
+      const input = container?.querySelector('.qty');
+      if (!input) return;
+      let currentQty = parseInt(input.value) || 1;
+      input.value = currentQty + 1;
+      input.dispatchEvent(new Event('input'));
+    });
+  });
+});
