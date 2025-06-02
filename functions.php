@@ -221,8 +221,8 @@ function send_telegram_order_notification($order_id) {
         return;
     }
 
-    $token = '';
-    $chat_id = ''; 
+    $token = TELEGRAM_BOT_TOKEN;
+    $chat_id = TELEGRAM_CHAT_ID; 
 
     $message = "🛒 Новый заказ №{$order_id}\n";
     $message .= "Клиент: " . $order->get_billing_first_name() . " " . $order->get_billing_last_name() . "\n";
@@ -264,5 +264,8 @@ function send_telegram_order_notification($order_id) {
     }
 }
 add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
+
+// turn of new cart woo
+add_filter( 'woocommerce_use_block_template_cart', '__return_false' );
 
 

@@ -15,7 +15,7 @@ const PhotoUploadApp = () => {
   const productId = container?.dataset?.productId || "unknown";
   const STORAGE_KEY = `magnet_photos_product_${productId}`;
 
-  const requiredPhotos = quantity * 2;
+  const requiredPhotos = quantity * 9;
 
   useEffect(() => {
     const input = document.querySelector(".mag-quantity");
@@ -67,7 +67,14 @@ const PhotoUploadApp = () => {
 
       if (uploadedPhotos.length < requiredPhotos) {
         e.preventDefault();
-        return;
+      }
+
+      if (uploadedPhotos.length > requiredPhotos) {
+        addToCartBtn.disabled = true
+        alertMsg.innerHTML = `<div class="py-2">
+        ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> photo${uploadedPhotos.length > 1 ? "s" : ""}, but only <b>${requiredPhotos}</b> are needed for <b>${quantity}</b> item${quantity > 1 ? "s" : ""}.<br/>
+        You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
+      </div>`;
       }
 
       if (uploadedPhotos.length === 0) {
@@ -117,7 +124,7 @@ const PhotoUploadApp = () => {
         Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
       </div>`;
     } else {
-      const maxItems = Math.floor(uploadedPhotos.length / 2);
+      const maxItems = Math.floor(uploadedPhotos.length / 9);
       const extra = uploadedPhotos.length - requiredPhotos;
       addClass("warn");
       alertMsg.innerHTML = `<div class="py-2">
@@ -158,7 +165,7 @@ const PhotoUploadApp = () => {
 
   return (
     <>
-      {showModal && uploadedPhotos.length < requiredPhotos && (
+      {showModal && (
         <PhotoModal
           currentIndex={uploadedPhotos.length + 1}
           total={requiredPhotos}
