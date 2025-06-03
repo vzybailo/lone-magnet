@@ -13,10 +13,9 @@ do_action( 'woocommerce_before_cart' );
   </p>
 
   <div class="mt-20 text-left max-w-6xl mx-auto">
-    <h3 class="text-2xl font-semibold mb-8 border-b border-gray-300 pb-4">You might also like</h3>
+    <h3 class="text-2xl font-semibold mb-8 border-b pb-4">You might also like</h3>
 
     <?php
-    // Получаем 4 случайных товара для блока рекомендаций
     $args = array(
       'post_type' => 'product',
       'posts_per_page' => 4,
@@ -29,7 +28,7 @@ do_action( 'woocommerce_before_cart' );
     if ( $loop->have_posts() ) : ?>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <?php while ( $loop->have_posts() ) : $loop->the_post(); global $product; ?>
-          <a href="<?php the_permalink(); ?>" class="block border shadow hover:shadow-lg transition">
+          <a href="<?php the_permalink(); ?>" class="block border">
             <?php if (has_post_thumbnail()) : ?>
               <div>
                 <?php the_post_thumbnail('medium', ['class' => 'w-full h-48 object-cover']); ?>
