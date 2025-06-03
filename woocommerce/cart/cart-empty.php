@@ -29,14 +29,16 @@ do_action( 'woocommerce_before_cart' );
     if ( $loop->have_posts() ) : ?>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <?php while ( $loop->have_posts() ) : $loop->the_post(); global $product; ?>
-          <a href="<?php the_permalink(); ?>" class="block border shadow hover:shadow-lg transition p-4">
+          <a href="<?php the_permalink(); ?>" class="block border shadow hover:shadow-lg transition">
             <?php if (has_post_thumbnail()) : ?>
-              <div class="mb-4">
+              <div>
                 <?php the_post_thumbnail('medium', ['class' => 'w-full h-48 object-cover']); ?>
               </div>
             <?php endif; ?>
-            <h4 class="text-lg font-medium mb-2 text-gray-900"><?php the_title(); ?></h4>
-            <span class="text-blue-600 font-semibold"><?php echo $product->get_price_html(); ?></span>
+            <div class="p-4">
+                <h4 class="text-lg font-medium mb-2 text-gray-900"><?php the_title(); ?></h4>
+                <span class="text-blue-600 font-semibold"><?php echo $product->get_price_html(); ?></span>
+            </div>
           </a>
         <?php endwhile; ?>
       </div>

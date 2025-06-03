@@ -309,3 +309,4 @@ add_action('woocommerce_add_order_item_meta', function($item_id, $values) {
         wc_add_order_item_meta($item_id, 'magnet_photos', $values['magnet_photos']);
     }
 }, 10, 2);
+
