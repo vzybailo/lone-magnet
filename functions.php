@@ -333,3 +333,46 @@ function custom_woocommerce_update_cart_item() {
 }
 
 
+
+add_action( 'wp_ajax_get_free_shipping_message', 'custom_get_free_shipping_message' );
+add_action( 'wp_ajax_nopriv_get_free_shipping_message', 'custom_get_free_shipping_message' );
+
+function custom_get_free_shipping_message() {
+    if ( ! WC()->cart ) {
+        wp_send_json_error( 'Cart not available' );
+    }
+
+    $threshold   = 40;
+    $cart_total  = WC()->cart->get_displayed_subtotal();
+    $diff        = $threshold - $cart_total;
+
+    ob_start();
+
+    if ( $diff > 0 ) : ?>
+        <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 p-3 rounded text-sm">
+            Spend <?php echo wc_price( $diff ); ?> more to get <strong>free shipping</strong>!
+        </div>
+    <?php else : ?>
+        <div class="bg-green-50 border border-green-300 text-green-800 p-3 rounded text-sm">
+            🎉 You qualify for <strong>free shipping</strong>!
+        </div>
+    <?php endif;
+
+    $html = ob_get_clean();
+    echo $html;
+    wp_die();
+}
+
+add_action( 'wp_enqueue_scripts', 'enqueue_cart_ajax_script' );
+function enqueue_cart_ajax_script() {
+    if ( is_cart() ) {
+        wp_enqueue_script( 'jquery' );
+
+        wp_add_inline_script( 'jquery', '', 'before' );
+
+        wp_localize_script( 'jquery', 'wc_cart_params', array(
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+        ) );
+    }
+}
+

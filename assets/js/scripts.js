@@ -117,3 +117,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const updateFreeShippingNotice = () => {
+    const xhr = new XMLHttpRequest();
+    const data = new FormData();
+    data.append('action', 'get_free_shipping_message');
+
+    xhr.open('POST', window.wc_cart_params.ajax_url, true);
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        const target = document.getElementById('free-shipping-message');
+        if (target) {
+          target.innerHTML = xhr.responseText;
+        }
+      }
+    };
+    xhr.send(data);
+  };
+
+  document.querySelectorAll('input.qty').forEach(function (input) {
+    input.addEventListener('change', function () {
+      setTimeout(updateFreeShippingNotice, 1000);
+    });
+  });
+});

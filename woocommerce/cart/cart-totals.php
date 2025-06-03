@@ -1,7 +1,7 @@
 <?php defined( 'ABSPATH' ) || exit; ?>
 
 <div class="mt-10 w-full max-w-md ml-auto">
-    <div class="space-y-4 text-sm text-gray-700">
+    <div class="space-y-4 text-sm text-gray-700" id="free-shipping-notice">
 
         <?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
             <div class="flex justify-between">
@@ -33,10 +33,28 @@
             <?php endif;
         endif; ?>
 
+        <!-- Free Shipping Notice -->
+        <div id="free-shipping-message">
+            <?php
+            $threshold = 40;
+            $cart_total = WC()->cart->get_displayed_subtotal();
+            $diff = $threshold - $cart_total;
+
+            if ( $diff > 0 ) : ?>
+                <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 p-3 text-sm">
+                    Spend <?php echo wc_price( $diff ); ?> more to get <strong>free shipping</strong>!
+                </div>
+            <?php else : ?>
+                <div class="bg-green-50 border border-green-300 text-green-800 p-3 text-sm">
+                    🎉 You qualify for <strong>free shipping</strong>!
+                </div>
+            <?php endif; ?>
+        </div>
+
         <div class="flex justify-between font-semibold text-lg pt-4">
             <div>
                 <div>Estimated total</div>
-                <div class="text-sm font-light">Final shipping and tax amounts will be shown on the checkout page.</div>
+                <div class="text-sm font-light">You’ll enter your address and payment method on the next step.</div>
             </div>
             <span><?php wc_cart_totals_order_total_html(); ?></span>
         </div>
@@ -46,3 +64,4 @@
         <?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
     </div>
 </div>
+
