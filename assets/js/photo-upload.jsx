@@ -7,14 +7,11 @@ const PhotoUploadApp = () => {
   const [quantity, setQuantity] = useState(1);
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [showMsg, setShowMsg] = useState(() => {
-    return sessionStorage.getItem('showMsg') === 'true';
-  });
+  const [showMsg, setShowMsg] = useState(false);
 
   const container = document.getElementById("custom-photo-modal-root");
   const productId = container?.dataset?.productId || "unknown";
   const STORAGE_KEY = `magnet_photos_product_${productId}`;
-
   const requiredPhotos = quantity * 9;
 
   useEffect(() => {
@@ -63,30 +60,20 @@ const PhotoUploadApp = () => {
       }
 
       setShowMsg(true);
-      sessionStorage.setItem('showMsg', 'true');
 
       if (uploadedPhotos.length < requiredPhotos) {
-        e.preventDefault();
+        e.preventDefault(); 
+      } else {
+        setUploadedPhotos([]);
+        sessionStorage.removeItem(STORAGE_KEY);
+        setShowMsg(false);
       }
 
-      if (uploadedPhotos.length > requiredPhotos) {
-        addToCartBtn.disabled = true
-        alertMsg.innerHTML = `<div class="py-2">
-        ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> photo${uploadedPhotos.length > 1 ? "s" : ""}, but only <b>${requiredPhotos}</b> are needed for <b>${quantity}</b> item${quantity > 1 ? "s" : ""}.<br/>
-        You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
-      </div>`;
+      if (showMsg && uploadedPhotos.length === 0) {
+        alertMsg.innerHTML = `<div class="py-2 warn">
+          ⚠️ You haven’t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order.
+        </div>`;
       }
-
-      if (uploadedPhotos.length === 0) {
-          alertMsg.innerHTML = `<div class="py-2 warn">
-        ⚠️ You haven’t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order. </div>`;
-        return;
-      }
-
-      sessionStorage.removeItem(STORAGE_KEY);
-      setShowMsg(false);
-
-      if (alertMsg) alertMsg.innerHTML = "";
     };
 
     addToCartBtn?.addEventListener("click", handleClick);
@@ -95,7 +82,6 @@ const PhotoUploadApp = () => {
     };
   }, [uploadedPhotos, requiredPhotos]);
 
-  // Централизованная логика уведомлений
   useEffect(() => {
     const alertMsg = document.querySelector(".lone-alert");
     if (!alertMsg || !showMsg) return;
@@ -107,11 +93,6 @@ const PhotoUploadApp = () => {
 
     const remaining = requiredPhotos - uploadedPhotos.length;
 
-    if (uploadedPhotos.length === 0) {
-      alertMsg.innerHTML = "";
-      return;
-    }
-
     if (uploadedPhotos.length === requiredPhotos) {
       addClass("success");
       alertMsg.innerHTML = `<div class="py-2">
@@ -120,8 +101,8 @@ const PhotoUploadApp = () => {
     } else if (uploadedPhotos.length < requiredPhotos) {
       addClass("warn");
       alertMsg.innerHTML = `<div class="py-2">
-        ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> out of <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}. 
-        Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} more to complete your order.
+        ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> out of <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""}.
+        Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} to complete your order.
       </div>`;
     } else {
       const maxItems = Math.floor(uploadedPhotos.length / 9);
@@ -129,7 +110,7 @@ const PhotoUploadApp = () => {
       addClass("warn");
       alertMsg.innerHTML = `<div class="py-2">
         ⚠️ You’ve uploaded <b>${uploadedPhotos.length}</b> photo${uploadedPhotos.length > 1 ? "s" : ""}, but only <b>${requiredPhotos}</b> are needed for <b>${quantity}</b> item${quantity > 1 ? "s" : ""}.<br/>
-        You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
+        You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
       </div>`;
     }
   }, [uploadedPhotos, requiredPhotos, quantity, showMsg]);
@@ -139,12 +120,15 @@ const PhotoUploadApp = () => {
     const newPhotos = [...uploadedPhotos, newPhoto];
     setUploadedPhotos(newPhotos);
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newPhotos));
+    setShowMsg(true);
   };
 
   const handleRemovePhoto = (id) => {
     const updated = uploadedPhotos.filter((photo) => photo.id !== id);
     setUploadedPhotos(updated);
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setShowMsg(true);
+    sessionStorage.setItem("showMsg", "true");
   };
 
   useEffect(() => {
@@ -203,9 +187,8 @@ const PhotoUploadApp = () => {
 const container = document.getElementById("custom-photo-modal-root");
 
 if (container) {
-  container.innerHTML = ""; 
+  container.innerHTML = "";
   const productId = container.dataset.productId || "unknown";
   const root = createRoot(container);
   root.render(<PhotoUploadApp productId={productId} />);
 }
-

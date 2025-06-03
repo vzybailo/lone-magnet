@@ -45,7 +45,7 @@
                     Spend <?php echo wc_price( $diff ); ?> more to get <strong>free shipping</strong>!
                 </div>
             <?php else : ?>
-                <div class="bg-green-50 border border-green-300 text-green-800 p-3 text-sm">
+                <div class="bg-emerald-50 border border-emerald-300 text-emerald-800 p-3 text-sm">
                     🎉 You qualify for <strong>free shipping</strong>!
                 </div>
             <?php endif; ?>
