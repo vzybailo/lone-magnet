@@ -1,8 +1,6 @@
 <?php defined( 'ABSPATH' ) || exit; ?>
 
-<?php if ( is_cart() ) : ?>
-    <!-- Это страница корзины -->
-<?php endif; ?>
+<h1 class="text-3xl font-bold mb-6 mt-10">Your cart</h1>
 
 <form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
     <?php do_action( 'woocommerce_before_cart_table' ); ?>
