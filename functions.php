@@ -316,3 +316,5 @@ remove_action( 'woocommerce_before_cart', 'wc_print_notices', 10 );
 remove_action( 'woocommerce_before_checkout_form', 'wc_print_notices', 10 );
 remove_action( 'woocommerce_account_content', 'wc_print_notices', 10 );
 
+
+

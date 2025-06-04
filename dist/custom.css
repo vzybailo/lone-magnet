@@ -78,3 +78,29 @@ main {
 .woocommerce {
   height: 100%;
 }
+/* Сброс скруглений и установка серой границы для всех инпутов WooCommerce */
+.woocommerce-checkout input[type="text"],
+.woocommerce-checkout input[type="email"],
+.woocommerce-checkout input[type="tel"],
+.woocommerce-checkout input[type="password"],
+.woocommerce-checkout input[type="number"],
+.woocommerce-checkout input[type="search"],
+.woocommerce-checkout select,
+.woocommerce-checkout textarea {
+  border-radius: 0 !important;
+  border: 1px solid #ccc !important;
+  box-shadow: none !important;
+  outline: none;
+}
+.wp-block-woocommerce-checkout {
+  padding-top: 0 !important;
+}
+.wc-block-components-checkout-step__description {
+  font-family: 'PoppinsLight';
+}
+.wp-block-woocommerce-checkout-fields-block {
+  border-right: 1px solid #e5e7eb !important;
+}
+.wp-block-woocommerce-checkout-order-summary-block {
+  border: none !important;
+}
