@@ -6,14 +6,18 @@ wc_print_notices();
 do_action( 'woocommerce_before_cart' );
 ?>
 
-<div class="container mx-auto px-4 py-16 text-center">
-  <h2 class="text-4xl font-semibold mb-4">Your Cart is Currently Empty</h2>
-  <p class="text-lg text-gray-600 mb-10">
-    Looks like you haven't added any items to your cart yet.
-  </p>
+<div class="container mx-auto pt-12 text-center flex flex-col justify-between h-full">
+  <div class="flex flex-col items-center">
+    <img src="<?php echo get_template_directory_uri() . '/assets/images/empty-cart.jpg'?>" alt="empty cart">
+    <h2 class="text-xl font-semibold mb-2">Your cart is empty</h2>
+    <p class="text-gray-600 mb-6">
+      Looks like you haven’t added anything yet. Let’s fix that!
+    </p>
+    <a href="/shop" class="bg-blue-700 text-white hover:bg-blue-800 py-2 px-4 transition-colors duration-300">Continue shopping</a>
+  </div>
 
-  <div class="mt-20 text-left max-w-6xl mx-auto">
-    <h3 class="text-2xl font-semibold mb-8 border-b pb-4">You might also like</h3>
+  <div class="mt-20 text-left max-w-6xl">
+    <h3 class="text-xl font-semibold mb-8 border-b pb-4">You might also like</h3>
 
     <?php
     $args = array(

@@ -75,3 +75,6 @@ body {
 main {
   flex: 1;
 }
+.woocommerce {
+  height: 100%;
+}

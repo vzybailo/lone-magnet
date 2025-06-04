@@ -119,27 +119,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// пересчитывается общая стоимость в корзине при измении количества товаров
 document.addEventListener('DOMContentLoaded', function () {
-  const updateFreeShippingNotice = () => {
-    const xhr = new XMLHttpRequest();
-    const data = new FormData();
-    data.append('action', 'get_free_shipping_message');
-
-    xhr.open('POST', window.wc_cart_params.ajax_url, true);
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        const target = document.getElementById('free-shipping-message');
-        if (target) {
-          target.innerHTML = xhr.responseText;
-        }
+  document.querySelectorAll('.increase-number, .decrease-number').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const updateBtn = document.querySelector('button[name="update_cart"]')
+      if (updateBtn) {
+        updateBtn.disabled = false
+        updateBtn.click()
       }
-    };
-    xhr.send(data);
-  };
+    })
+  })
 
-  document.querySelectorAll('input.qty').forEach(function (input) {
+  document.querySelectorAll('input.qty').forEach(input => {
     input.addEventListener('change', function () {
-      setTimeout(updateFreeShippingNotice, 1000);
-    });
-  });
-});
+      const updateBtn = document.querySelector('button[name="update_cart"]')
+      if (updateBtn) {
+        updateBtn.disabled = false
+        updateBtn.click()
+      }
+    })
+  })
+})
+
+
+
+
+
+

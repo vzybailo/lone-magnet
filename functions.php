@@ -310,3 +310,9 @@ add_action('woocommerce_add_order_item_meta', function($item_id, $values) {
     }
 }, 10, 2);
 
+
+remove_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
+remove_action( 'woocommerce_before_cart', 'wc_print_notices', 10 );
+remove_action( 'woocommerce_before_checkout_form', 'wc_print_notices', 10 );
+remove_action( 'woocommerce_account_content', 'wc_print_notices', 10 );
+
