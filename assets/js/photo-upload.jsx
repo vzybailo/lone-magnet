@@ -61,13 +61,13 @@ const PhotoUploadApp = () => {
 
       setShowMsg(true);
 
-      if (uploadedPhotos.length < requiredPhotos) {
-        e.preventDefault(); 
+      if (uploadedPhotos.length !== requiredPhotos) {
+        e.preventDefault();
       } else {
         setUploadedPhotos([]);
         sessionStorage.removeItem(STORAGE_KEY);
         setShowMsg(false);
-      }
+      }      
 
       if (showMsg && uploadedPhotos.length === 0) {
         alertMsg.innerHTML = `<div class="py-2 warn">

@@ -79,19 +79,37 @@ main {
   height: 100%;
 }
 /* Сброс скруглений и установка серой границы для всех инпутов WooCommerce */
+/* === Checkout field styles === */
 .woocommerce-checkout input[type="text"],
 .woocommerce-checkout input[type="email"],
 .woocommerce-checkout input[type="tel"],
-.woocommerce-checkout input[type="password"],
 .woocommerce-checkout input[type="number"],
-.woocommerce-checkout input[type="search"],
-.woocommerce-checkout select,
-.woocommerce-checkout textarea {
+.woocommerce-checkout input[type="password"],
+.woocommerce-checkout input[type="checkbox"],
+.woocommerce-checkout textarea,
+.woocommerce-checkout select {
+  border: none !important;
+  border-bottom: 1px solid #ccc !important;
   border-radius: 0 !important;
-  border: 1px solid #ccc !important;
+  background-color: transparent !important;
   box-shadow: none !important;
-  outline: none;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
+
+.woocommerce-checkout input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4B5563; /* gray-700 */
+}
+
+.woocommerce-checkout label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
 .wp-block-woocommerce-checkout {
   padding-top: 0 !important;
 }
@@ -103,4 +121,16 @@ main {
 }
 .wp-block-woocommerce-checkout-order-summary-block {
   border: none !important;
+}
+.wc-block-checkout__main,
+.wc-block-components-checkout-order-summary__title {
+  padding-top: 50px;
+  margin-top: 0 !important;
+}
+.wc-block-components-product-metadata {
+  display: none;
+}
+.wc-block-components-checkout-place-order-button__text {
+  background-color: #027a48;
+  padding: 20px;
 }
