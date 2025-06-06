@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 
-<main class="container mx-auto">
+<main class="container mx-auto max-sm:px-4">
   <?php while ( have_posts() ) : the_post(); ?>
     <article class="prose max-w-full">
       <?php the_content(); ?>

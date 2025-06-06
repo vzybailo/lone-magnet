@@ -213,7 +213,7 @@ add_action('woocommerce_admin_order_data_after_order_details', function($order) 
     }
 });
 
-
+// notification about new order to telegram
 function send_telegram_order_notification($order_id) {
     $order = wc_get_order($order_id);
     if (!$order) {
@@ -310,7 +310,7 @@ add_action('woocommerce_add_order_item_meta', function($item_id, $values) {
     }
 }, 10, 2);
 
-
+// turn off woo notifications
 remove_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
 remove_action( 'woocommerce_before_cart', 'wc_print_notices', 10 );
 remove_action( 'woocommerce_before_checkout_form', 'wc_print_notices', 10 );
