@@ -184,11 +184,30 @@ label.wc-block-components-radio-control__option--checked-option-highlighted,
   color: #fff;
   background-color: #439f33;
 }
+.woocommerce .product  img, 
+.woocommerce-page .product img {
+  width: 100% !important;
+}
+.wpcf7-form-control {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  width: 100%;
+}
+.wpcf7-form-control:focus {
+  border: 1px solid #000 !important;
+  outline: none;
+}
+.wpcf7-form-control::placeholder {
+  font-family: "PoppinsLight";
+}
+.wpcf7-form-control.submit-btn {
+  background-color: #e9e6ed;
+  border: none;
+  cursor: pointer;
+}
 @media (max-width: 768px) {
-  .woocommerce {
-    padding: 0 1rem;
-  }
   .wp-block-woocommerce-checkout-order-summary-block {
     display: none !important;
   }
 }
+
