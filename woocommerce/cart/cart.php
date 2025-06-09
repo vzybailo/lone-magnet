@@ -1,6 +1,6 @@
 <?php defined( 'ABSPATH' ) || exit; ?>
 
-<h1 class="text-3xl font-bold mb-6 mt-10">Your cart</h1>
+<h1 class="text-3xl font-bold mb-6 mt-10 max-sm:px-4">Your cart</h1>
 
 <form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
     <?php do_action( 'woocommerce_before_cart_table' ); ?>
@@ -22,7 +22,7 @@
                     if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 ) :
                         $product_permalink = $_product->is_visible() ? $_product->get_permalink( $cart_item ) : '';
                 ?>
-                <tr class="block md:table-row mb-4 md:mb-0 border md:border-0 rounded md:rounded-none p-4 md:p-0">
+                <tr class="block md:table-row mb-4 p-4 md:p-0">
 
                     <td class="py-3 block md:table-cell">
                         <div class="flex items-center gap-4">

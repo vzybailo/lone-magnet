@@ -36,7 +36,7 @@
               ?>
             </span>
           </a>
-          <div id="burger-btn" class="flex flex-col justify-center items-center w-8 h-8 cursor-pointer z-30 relative max-sm:flex hidden">
+          <div id="burger-btn" class="flex flex-col justify-center items-center w-8 h-8 cursor-pointer z-30 relative max-md:flex hidden">
             <span class="burger-line w-6 h-[2px] bg-black mb-1 transition-all duration-300"></span>
             <span class="burger-line w-6 h-[2px] bg-black mb-1 transition-all duration-300"></span>
             <span class="burger-line w-6 h-[2px] bg-black transition-all duration-300"></span>

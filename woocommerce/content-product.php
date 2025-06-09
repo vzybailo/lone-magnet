@@ -16,7 +16,7 @@ $review_count = $product->get_review_count();
         <?php echo $product->get_image( 'woocommerce_thumbnail', [ 'class' => 'object-cover w-full h-full' ] ); ?>
     </div>
 
-    <h2 class="text-lg font-semibold mb-1"><?php the_title(); ?></h2>
+    <h2 class="text-lg mb-1"><?php the_title(); ?></h2>
 
     <?php if ( $rating > 0 ) : ?>
         <div class="flex items-center text-gold text-sm mb-1">

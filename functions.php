@@ -189,7 +189,7 @@ function generate_zip_for_order($order_id) {
                     if ($photo_contents = @file_get_contents($photo_url)) {
                         $file_name = basename(parse_url($photo_url, PHP_URL_PATH));
                         $zip->addFromString("{$item_id}_{$file_name}", $photo_contents);
-                    }
+                    } 
                 }
             }
         }
@@ -217,7 +217,6 @@ add_action('woocommerce_admin_order_data_after_order_details', function($order) 
 function send_telegram_order_notification($order_id) {
     $order = wc_get_order($order_id);
     if (!$order) {
-        error_log("❌ Order not found for ID: $order_id");
         return;
     }
 
@@ -252,16 +251,7 @@ function send_telegram_order_notification($order_id) {
         'timeout' => 15,
     );
 
-    // Логируем отправку
-    error_log("📤 Sending Telegram message: $message");
-
     $response = wp_remote_post($url, $args);
-
-    if (is_wp_error($response)) {
-        error_log('❌ Telegram error: ' . $response->get_error_message());
-    } else {
-        error_log('✅ Telegram sent successfully: ' . wp_remote_retrieve_body($response));
-    }
 }
 add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
 
@@ -304,16 +294,36 @@ function restore_uploaded_photos_from_session($cart_item, $values) {
     return $cart_item;
 }
 
-add_action('woocommerce_add_order_item_meta', function($item_id, $values) {
+add_action('woocommerce_new_order_item', function($item_id, $values) {
     if (!empty($values['magnet_photos'])) {
         wc_add_order_item_meta($item_id, 'magnet_photos', $values['magnet_photos']);
     }
 }, 10, 2);
 
 // turn off woo notifications
-remove_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
-remove_action( 'woocommerce_before_cart', 'wc_print_notices', 10 );
-remove_action( 'woocommerce_before_checkout_form', 'wc_print_notices', 10 );
-remove_action( 'woocommerce_account_content', 'wc_print_notices', 10 );
+remove_action( 'woocommerce_before_single_product', 'woocommerce_output_all_notices', 10 );
+remove_action( 'woocommerce_before_shop_loop', 'woocommerce_output_all_notices', 10 );
+remove_action( 'woocommerce_before_cart', 'woocommerce_output_all_notices', 10 );
+remove_action( 'woocommerce_before_checkout_form', 'woocommerce_output_all_notices', 10 );
 
+add_filter( 'woocommerce_cart_item_removed_notice_type', '__return_false' );
+
+function tb_delete_remove_product_notice(){
+	$notices = WC()->session->get( 'wc_notices', array() );
+	if(isset($notices['success'])){
+		for($i = 0; $i < count($notices['success']); $i++){
+			if (strpos($notices['success'][$i], __('removed','woocommerce')) !== false) {
+				array_splice($notices['success'],$i,1);
+			}
+		}
+		WC()->session->set( 'wc_notices', $notices['success'] );
+	}
+}
+
+add_action( 'woocommerce_before_shop_loop', 'tb_delete_remove_product_notice', 5 );
+add_action( 'woocommerce_shortcode_before_product_cat_loop', 'tb_delete_remove_product_notice', 5 );
+add_action( 'woocommerce_before_single_product', 'tb_delete_remove_product_notice', 5 );
+
+
+// remove  tag p in the cf7
 add_filter('wpcf7_autop_or_not', '__return_false');

@@ -107,7 +107,7 @@ export default function PhotoModal({ onClose, onComplete }) {
 
         {images.length === 0 ? (
           <div
-            className="border-dashed border-2 border-gray-300 p-4 text-center text-sm cursor-pointer"
+            className="border-dashed border-2 border-gray-300 px-4 py-12 text-center text-sm cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
             Drag and drop images or click to select.

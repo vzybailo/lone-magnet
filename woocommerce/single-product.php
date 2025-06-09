@@ -8,9 +8,9 @@ $main_image_id = $product->get_image_id();
 $gallery_ids = $product->get_gallery_image_ids();
 ?>
 
-<div class="container max-sm:px-4">
-    <div class="flex pt-12 max-sm:flex-col mb-12">
-        <div class="w-2/3 grid grid-cols-2 gap-4 h-[fit-content] mr-6 max-sm:w-full max-sm:grid-cols-1 max-sm:mr-0 max-sm:mb-4">
+<div class="container">
+    <div class="flex pt-12 max-md:flex-col max-sm:px-4 mb-12">
+        <div class="w-2/3 grid grid-cols-2 gap-4 h-[fit-content] mr-6 max-md:w-full max-md:grid-cols-1 max-md:mr-0 max-md:mb-4">
             <?php if ($main_image_id): 
                 $full_url = wp_get_attachment_image_url($main_image_id, 'full');
                 $thumb = wp_get_attachment_image($main_image_id, 'medium', false, ['class' => 'w-full h-full object-cover mag-pic']);
@@ -29,14 +29,14 @@ $gallery_ids = $product->get_gallery_image_ids();
                 $thumb = wp_get_attachment_image($id, 'medium', false, ['class' => 'w-full h-full object-cover mag-pic']);
             ?>
                 <a href="<?php echo esc_url($full); ?>"
-                    class="glightbox aspect-square overflow-hidden <?php echo $index === 0 ? '' : 'max-sm:hidden'; ?>"
+                    class="glightbox aspect-square overflow-hidden <?php echo $index === 0 ? '' : 'max-md:hidden'; ?>"
                     data-gallery="product-gallery">
                     <?php echo $thumb; ?>
                 </a>
             <?php $index++; endforeach; ?>
         </div>
 
-        <div class="w-1/3 max-sm:w-full">
+        <div class="w-1/3 max-md:w-full">
             <h1 class="text-3xl font-bold mb-4"><?php the_title(); ?></h1>
 
             <div class="text-gold mb-4">
@@ -60,7 +60,7 @@ $gallery_ids = $product->get_gallery_image_ids();
                     <div class="mb-2 text-sm font-light">Quantity</div>
                     <?php woocommerce_quantity_input(); ?>
                 </div>
-                <div class="flex flex-col max-sm:w-full">
+                <div class="flex flex-col max-md:w-full">
                     <div class="mb-2">
                         <?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
                     </div>
@@ -70,7 +70,7 @@ $gallery_ids = $product->get_gallery_image_ids();
                     </button>
                 </div>
             </form>
-            <div>
+            <div class="product">
                 <?php the_content(); ?>
             </div>
         </div>

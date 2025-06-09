@@ -1,5 +1,5 @@
 <footer class="bg-gray-900 text-gray-300 text-center py-2">
-  <div class="container mx-auto px-4 flex items-center justify-between font-light">
+  <div class="container mx-auto px-4 flex items-center justify-between font-light max-sm:flex-col">
     <p class="text-sm">
       &copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>. All rights reserved.
     </p>

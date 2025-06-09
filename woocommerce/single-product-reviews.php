@@ -7,7 +7,7 @@ if (!comments_open()) {
 }
 ?>
 
-<div id="reviews" class="woocommerce-Reviews mt-12">
+<div id="reviews" class="woocommerce-Reviews my-12 max-sm:px-4">
 
   <!-- Reviews Title -->
   <h2 class="text-2xl font-semibold text-center max-sm:text-xl">
