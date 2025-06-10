@@ -161,43 +161,54 @@ function show_uploaded_photos_in_admin($item_id, $item, $product) {
 }
 
 // формируем архив фото для скачивания в заказе
-add_action('woocommerce_thankyou', 'generate_zip_for_order', 20);
+add_action('woocommerce_order_status_changed', 'generate_zip_for_order', 20);
 function generate_zip_for_order($order_id) {
     if (!$order_id) return;
 
     $order = wc_get_order($order_id);
+    if (!$order) return;
 
-    // Пропустить, если ZIP уже создан
-    if ($order->get_meta('magnet_zip_url')) {
-        return;
+    // Пропустить, если ZIP уже существует
+    if ($order->get_meta('magnet_zip_url')) return;
+
+    $upload_dir = wp_upload_dir();
+    $zip_dir = $upload_dir['basedir'] . "/order_zips";
+    $zip_path = "{$zip_dir}/order-{$order_id}.zip";
+
+    // Убедимся, что директория существует
+    if (!file_exists($zip_dir)) {
+        wp_mkdir_p($zip_dir);
     }
 
     $zip = new ZipArchive();
-    $upload_dir = wp_upload_dir();
-    $zip_path = $upload_dir['basedir'] . "/order_zips/order-{$order_id}.zip";
+    if ($zip->open($zip_path, ZipArchive::CREATE) !== true) return;
 
-    if (!file_exists(dirname($zip_path))) {
-        wp_mkdir_p(dirname($zip_path));
+    $files_added = 0;
+
+    foreach ($order->get_items() as $item_id => $item) {
+        $photos = wc_get_order_item_meta($item_id, 'magnet_photos');
+        if (!is_array($photos)) continue;
+
+        foreach ($photos as $photo) {
+            if (!isset($photo['url'])) continue;
+
+            $photo_contents = @file_get_contents($photo['url']);
+            if ($photo_contents === false) continue;
+
+            $file_name = basename(parse_url($photo['url'], PHP_URL_PATH));
+            $zip->addFromString("{$item_id}_{$file_name}", $photo_contents);
+            $files_added++;
+        }
     }
 
-    if ($zip->open($zip_path, ZipArchive::CREATE) === TRUE) {
-        foreach ($order->get_items() as $item_id => $item) {
-            $photos = wc_get_order_item_meta($item_id, 'magnet_photos');
-            if (is_array($photos)) {
-                foreach ($photos as $photo) {
-                    $photo_url = $photo['url'];
-                    if ($photo_contents = @file_get_contents($photo_url)) {
-                        $file_name = basename(parse_url($photo_url, PHP_URL_PATH));
-                        $zip->addFromString("{$item_id}_{$file_name}", $photo_contents);
-                    } 
-                }
-            }
-        }
-        $zip->close();
+    $zip->close();
 
+    if ($files_added > 0) {
         $zip_url = $upload_dir['baseurl'] . "/order_zips/order-{$order_id}.zip";
         $order->update_meta_data('magnet_zip_url', esc_url_raw($zip_url));
         $order->save();
+    } else {
+        @unlink($zip_path); // Удаляем пустой ZIP
     }
 }
 
@@ -327,3 +338,4 @@ add_action( 'woocommerce_before_single_product', 'tb_delete_remove_product_notic
 
 // remove  tag p in the cf7
 add_filter('wpcf7_autop_or_not', '__return_false');
+
