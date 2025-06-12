@@ -168,14 +168,12 @@ function generate_zip_for_order($order_id) {
     $order = wc_get_order($order_id);
     if (!$order) return;
 
-    // Пропустить, если ZIP уже существует
     if ($order->get_meta('magnet_zip_url')) return;
 
     $upload_dir = wp_upload_dir();
     $zip_dir = $upload_dir['basedir'] . "/order_zips";
     $zip_path = "{$zip_dir}/order-{$order_id}.zip";
 
-    // Убедимся, что директория существует
     if (!file_exists($zip_dir)) {
         wp_mkdir_p($zip_dir);
     }
@@ -212,17 +210,73 @@ function generate_zip_for_order($order_id) {
     }
 }
 
-// добавляем к заказу кнопку для скачивания фото 
-add_action('woocommerce_admin_order_data_after_order_details', function($order) {
-    $zip_url = $order->get_meta('magnet_zip_url');
-    if ($zip_url) {
-        echo '
-            <div class="form-field form-field-wide">
-                <div style="color: #777; padding: 0 0 3px;">Photos for printing:</div>
-                <a href="' . esc_url($zip_url) . '" target="_blank" class="button">Download ZIP</a>
-            </div>';
+// Генерирование pdf для вывода на печать
+add_action('init', function () {
+    if (isset($_GET['generate_order_pdf_tcpdf'])) {
+        $order_id = intval($_GET['generate_order_pdf_tcpdf']);
+        if (!$order_id) {
+            wp_die('Order ID missing.');
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            wp_die('Order not found.');
+        }
+
+        require_once get_template_directory() . '/tcpdf/tcpdf.php';
+
+        // Сбор фото
+        $photos = [];
+        foreach ($order->get_items() as $item_id => $item) {
+            $item_photos = wc_get_order_item_meta($item_id, 'magnet_photos');
+            if (is_array($item_photos)) {
+                foreach ($item_photos as $photo) {
+                    if (!empty($photo['url'])) {
+                        $photos[] = esc_url($photo['url']);
+                    }
+                }
+            }
+        }
+
+        $photos = array_slice($photos, 0, 9);
+
+        // 👉 Загрузка HTML-шаблона
+        ob_start();
+        include get_template_directory() . '/pdf-template/template.php'; 
+        $html = ob_get_clean();
+
+        // Генерация PDF
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->AddPage();
+
+        $pdf->writeHTML($html, true, false, true, false, '');
+        $pdf->Output("order-{$order_id}.pdf", 'I');
+        exit;
     }
 });
+
+// кнопки архива и печати в заказе
+add_action('woocommerce_admin_order_data_after_order_details', function($order) {
+    $order_id = $order->get_id();
+    $pdf_url = site_url("?generate_order_pdf_tcpdf={$order_id}");
+    $zip_url = $order->get_meta('magnet_zip_url');
+
+    echo '<div class="form-field form-field-wide" style="margin-top:10px;">';
+    echo '<div style="display:block; margin-bottom:5px;">Photos:</div>';
+    echo '<div style="display: flex; gap: 10px;">';
+
+    if ($zip_url) {
+        echo '<a class="button" target="_blank" href="' . esc_url($zip_url) . '">🗃️ Download ZIP</a>';
+    }
+
+    echo '<a class="button" target="_blank" href="' . esc_url($pdf_url) . '">🖨️ Print</a>';
+
+    echo '</div>';
+    echo '</div>';
+});
+
+
 
 // notification about new order to telegram
 function send_telegram_order_notification($order_id) {
@@ -268,7 +322,6 @@ add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
 
 // turn of new cart woo
 add_filter( 'woocommerce_use_block_template_cart', '__return_false' );
-
 
 // change  product thumnail in the cart
 add_filter('woocommerce_add_cart_item_data', 'save_uploaded_photos_to_cart_item', 10, 3);
