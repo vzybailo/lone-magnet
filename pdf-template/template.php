@@ -17,14 +17,14 @@
 
         table {
             width: 100%;
+            height: 287mm; 
             border-collapse: collapse;
         }
-
         td {
             width: 33.33%;
-            height: 65mm;
+            height: 95.666mm;
             text-align: center;
-            vertical-align: top;
+            vertical-align: middle;
             padding: 0;
         }
 
@@ -36,12 +36,12 @@
 
         .photo-caption {
             font-size: 8pt;
-            margin-bottom: 1mm;
+            margin-top: 1mm;
         }
+
         .site-caption {
             font-size: 8pt;
-            margin-top: 1mm;
-            transform: rotate(360deg);
+            margin-bottom: 1mm;
         }
     </style>
 </head>
@@ -51,12 +51,10 @@
     <?php for ($row = 0; $row < 3; $row++): ?>
         <tr>
             <?php for ($col = 0; $col < 3; $col++): ?>
-                <?php
-                $index = $row * 3 + $col;
-                ?>
+                <?php $index = $row * 3 + $col; ?>
                 <td>
                     <?php if (!empty($photos[$index])): ?>
-                        <div class="site-caption"><?php echo get_home_url(); ?></div>
+                        <div class="site-caption"><?= get_home_url(); ?></div>
                         <img class="photo-img" src="<?= $photos[$index] ?>" alt="Photo <?= $index + 1 ?>">
                         <div class="photo-caption">Order #<?= $order_id ?></div>
                     <?php endif; ?>

@@ -248,6 +248,7 @@ add_action('init', function () {
         // Генерация PDF
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
         $pdf->SetMargins(10, 10, 10);
+        $pdf->SetFont('dejavusans', '', 10);
         $pdf->AddPage();
 
         $pdf->writeHTML($html, true, false, true, false, '');
@@ -276,11 +277,10 @@ add_action('woocommerce_admin_order_data_after_order_details', function($order) 
     echo '</div>';
 });
 
-
-
 // notification about new order to telegram
 function send_telegram_order_notification($order_id) {
     $order = wc_get_order($order_id);
+
     if (!$order) {
         return;
     }
@@ -288,11 +288,14 @@ function send_telegram_order_notification($order_id) {
     $token = TELEGRAM_BOT_TOKEN;
     $chat_id = TELEGRAM_CHAT_ID; 
 
-    $message = "🛒 Новый заказ №{$order_id}\n";
-    $message .= "Клиент: " . $order->get_billing_first_name() . " " . $order->get_billing_last_name() . "\n";
-    $message .= "Телефон: " . $order->get_billing_phone() . "\n";
+    $admin_url = admin_url("post.php?post={$order_id}&action=edit");
+    $pdf_url = site_url("?generate_order_pdf_tcpdf={$order_id}");
+
+    $message = "🛒 <b> New Order #{$order_id}</b>\n\n";
+    $message .= "Customer: " . $order->get_billing_first_name() . " " . $order->get_billing_last_name() . "\n";
+    $message .= "Shipping Address: " . wp_strip_all_tags($order->get_formatted_shipping_address()) . "\n";
     $message .= "Email: " . $order->get_billing_email() . "\n";
-    $message .= "Товары:\n";
+    $message .= "Items:\n";
 
     foreach ($order->get_items() as $item) {
         $product_name = $item->get_name();
@@ -300,7 +303,19 @@ function send_telegram_order_notification($order_id) {
         $message .= "- {$product_name} x{$qty}\n";
     }
 
-    $message .= "Итого: " . $order->get_formatted_order_total();
+    $message .= "\n💰 Total: " . wp_strip_all_tags($order->get_formatted_order_total());
+
+    $buttons = [];
+
+    if ($pdf_url) {
+        $buttons[] = [
+            ['text' => '🖨️ Print PDF', 'url' => $pdf_url],
+        ];
+    }
+
+    if ($admin_url) {
+        $buttons[] = [['text' => '🛠️ View in Admin', 'url' => $admin_url]];
+    }
 
     $url = "https://api.telegram.org/bot{$token}/sendMessage";
 
@@ -309,6 +324,9 @@ function send_telegram_order_notification($order_id) {
             'chat_id' => $chat_id,
             'text' => $message,
             'parse_mode' => 'HTML',
+            'reply_markup' => [
+                'inline_keyboard' => $buttons
+            ]
         ]),
         'headers' => array(
             'Content-Type' => 'application/json',
@@ -317,6 +335,13 @@ function send_telegram_order_notification($order_id) {
     );
 
     $response = wp_remote_post($url, $args);
+
+    if (is_wp_error($response)) {
+        error_log('[Telegram Error] ' . $response->get_error_message());
+    } else {
+        $body = wp_remote_retrieve_body($response);
+        error_log('[Telegram Response] ' . $body);
+    }
 }
 add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
 
