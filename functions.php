@@ -69,7 +69,6 @@ function enqueue_custom_photo_upload_script() {
 }
 add_action('wp_enqueue_scripts', 'enqueue_custom_photo_upload_script');
 
-
 // custom classes for price
 function custom_woocommerce_price_html( $price, $product ) {
     if ( $product->is_on_sale() ) {
@@ -144,9 +143,8 @@ function save_photos_to_order($item, $cart_item_key, $values, $order) {
     }
 }
 
-add_action('woocommerce_after_order_itemmeta', 'show_uploaded_photos_in_admin', 10, 3);
-
 // показываем миниатюры загруженных фото в заказе в админке
+add_action('woocommerce_after_order_itemmeta', 'show_uploaded_photos_in_admin', 10, 3);
 function show_uploaded_photos_in_admin($item_id, $item, $product) {
     $photos = wc_get_order_item_meta($item_id, 'magnet_photos');
     if (is_array($photos) && !empty($photos)) {
@@ -348,19 +346,6 @@ add_action('woocommerce_new_order', 'send_telegram_order_notification', 10, 1);
 // turn of new cart woo
 add_filter( 'woocommerce_use_block_template_cart', '__return_false' );
 
-// change  product thumnail in the cart
-add_filter('woocommerce_add_cart_item_data', 'save_uploaded_photos_to_cart_item', 10, 3);
-function save_uploaded_photos_to_cart_item($cart_item_data, $product_id, $variation_id) {
-    if (!empty($_POST['magnet_photos_data'])) {
-        $photos = json_decode(stripslashes($_POST['magnet_photos_data']), true);
-        if ($photos && is_array($photos)) {
-            $cart_item_data['magnet_photos'] = $photos;
-            $cart_item_data['unique_key'] = md5(microtime().rand());
-        }
-    }
-    return $cart_item_data;
-}
-
 add_filter('woocommerce_cart_item_thumbnail', 'replace_cart_thumbnail_with_uploaded_photos', 10, 3);
 function replace_cart_thumbnail_with_uploaded_photos($thumbnail, $cart_item, $cart_item_key) {
     if (!empty($cart_item['magnet_photos'])) {
@@ -382,12 +367,6 @@ function restore_uploaded_photos_from_session($cart_item, $values) {
     }
     return $cart_item;
 }
-
-add_action('woocommerce_new_order_item', function($item_id, $values) {
-    if (!empty($values['magnet_photos'])) {
-        wc_add_order_item_meta($item_id, 'magnet_photos', $values['magnet_photos']);
-    }
-}, 10, 2);
 
 // turn off woo notifications
 remove_action( 'woocommerce_before_single_product', 'woocommerce_output_all_notices', 10 );
@@ -413,7 +392,5 @@ add_action( 'woocommerce_before_shop_loop', 'tb_delete_remove_product_notice', 5
 add_action( 'woocommerce_shortcode_before_product_cat_loop', 'tb_delete_remove_product_notice', 5 );
 add_action( 'woocommerce_before_single_product', 'tb_delete_remove_product_notice', 5 );
 
-
 // remove  tag p in the cf7
 add_filter('wpcf7_autop_or_not', '__return_false');
-
