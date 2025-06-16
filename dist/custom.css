@@ -209,6 +209,10 @@ label.wc-block-components-radio-control__option--checked-option-highlighted,
   list-style-type: disc;
   padding: 20px;
 }
+.woocommerce #review_form #respond .form-submit input {
+  font-weight: 400;
+  border-radius: 0;
+}
 @media (max-width: 768px) {
   .wp-block-woocommerce-checkout-order-summary-block {
     display: none !important;

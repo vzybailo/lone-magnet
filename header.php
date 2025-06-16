@@ -7,7 +7,7 @@
 </head>
 <body <?php body_class(); ?>>
   <header class="header border-b">
-    <div class="bg-gray-800 text-white text-center text-xs py-2">🚚✈️ FREE SHIPPING on US orders over $40</div>
+    <div class="bg-gray-900 text-white text-center text-xs py-2">🚚✈️ Enjoy FREE U.S. shipping on orders over $40</div>
     <div class="container mx-auto flex justify-between items-center py-8 max-sm:px-4 max-sm:py-4">
       <a href="<?php echo esc_url(home_url('/')); ?>" class="flex items-center">
         <?php 

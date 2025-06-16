@@ -5,9 +5,9 @@
 get_header();
 ?>
 
-<section class="bg-gray-50 py-16">
+<section class="py-16 flex-1">
   <div class="container mx-auto px-4 max-w-3xl">
-    <h1 class="text-4xl font-bold mb-6 text-center text-gray-800">Get in Touch</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Get in Touch</h1>
     <p class="text-lg font-light text-gray-600 mb-10 text-center">
       Have a question or just want to say hi? Fill out the form below and we’ll get back to you as soon as possible.
     </p>

@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit;
 get_header( 'shop' );
 ?>
 
-<div class="container max-sm:px-4 py-10">
+<div class="container max-sm:px-4 py-10 flex-1">
 
     <h1 class="text-3xl font-bold mb-8">
         <?php woocommerce_page_title(); ?>
