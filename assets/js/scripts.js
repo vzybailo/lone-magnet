@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   burgerBtn.addEventListener('click', () => {
     const isOpen = burgerMenu.classList.contains('translate-x-0')
-    burgerMenu.style.top = `${headerHeight}px`
+    burgerMenu.style.top = `${headerHeight - window.scrollY}px`
 
     if (isOpen) {
       burgerMenu.classList.remove('translate-x-0')

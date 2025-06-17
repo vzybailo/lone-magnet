@@ -213,6 +213,27 @@ label.wc-block-components-radio-control__option--checked-option-highlighted,
   font-weight: 400;
   border-radius: 0;
 }
+.socials-icon svg {
+  fill: #fff;
+  width: 24px;
+  height: 24px;
+  transition: .3s;
+}
+.socials-icon svg:hover {
+  fill: #91f0db;
+  transition: .3s;
+}
+.menu-item {
+  transition: 0.3s;
+}
+.menu-item.current-menu-item {
+  border-bottom: 1px gray solid;
+}
+.menu-item:hover {
+  border-bottom: 1px gray solid;
+  transition: 0.3s;
+  box-sizing: border-box;
+}
 @media (max-width: 768px) {
   .wp-block-woocommerce-checkout-order-summary-block {
     display: none !important;

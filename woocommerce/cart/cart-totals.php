@@ -1,6 +1,6 @@
 <?php defined( 'ABSPATH' ) || exit; ?>
 
-<div class="mt-10 w-full max-md:max-w-full  max-w-md ml-auto max-md:ml-0 max-sm:px-4 max-sm:pb-12">
+<div class="my-10 w-full max-md:max-w-full  max-w-md ml-auto max-md:ml-0 max-sm:px-4 max-sm:pb-12">
     <div class="space-y-4 text-sm text-gray-700" id="free-shipping-notice">
 
         <?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
