@@ -3,12 +3,13 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "./utils/getCroppedImg";
 
 export default function PhotoModal({ onClose, onComplete }) {
-  const [images, setImages] = useState([]); // массив изображений
+  const [images, setImages] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [cropProgress, setCropProgress] = useState(0);
   const fileInputRef = useRef(null);
 
   const onCropComplete = useCallback((_, areaPixels) => {
@@ -33,9 +34,12 @@ export default function PhotoModal({ onClose, onComplete }) {
 
   const handleSave = async () => {
     setIsSaving(true);
+    setCropProgress(0);
+
     try {
       const { src } = images[currentIndex];
-      const croppedImage = await getCroppedImg(src, croppedAreaPixels);
+      const croppedImage = await getCroppedImg(src, croppedAreaPixels, setCropProgress);
+
       const file = new File([croppedImage], `photo-${currentIndex + 1}.jpg`, {
         type: "image/jpeg",
       });
@@ -66,6 +70,7 @@ export default function PhotoModal({ onClose, onComplete }) {
         setCurrentIndex(currentIndex + 1);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
+        setCropProgress(0);
       } else {
         onClose();
       }
@@ -136,30 +141,72 @@ export default function PhotoModal({ onClose, onComplete }) {
                 onCropComplete={onCropComplete}
               />
             </div>
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.1}
-              value={zoom}
-              onChange={(e) => setZoom(e.target.value)}
-              className="w-full mt-2"
-            />
+            <div class="flex items-center mt-2">
+              <span class="text-sm mr-2">zoom</span>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(e.target.value)}
+                className="w-full h-1 appearance-none bg-gray-300 rounded-sm outline-none transition-all duration-200
+                          [&::-webkit-slider-thumb]:appearance-none
+                          [&::-webkit-slider-thumb]:w-3
+                          [&::-webkit-slider-thumb]:h-3
+                          [&::-webkit-slider-thumb]:bg-grey
+                          [&::-webkit-slider-thumb]:rounded-full
+                          [&::-webkit-slider-thumb]:cursor-pointer
+                          [&::-moz-range-thumb]:appearance-none
+                          [&::-moz-range-thumb]:w-3
+                          [&::-moz-range-thumb]:h-3
+                          [&::-moz-range-thumb]:bg-grey
+                          [&::-moz-range-thumb]:rounded-full
+                          [&::-moz-range-thumb]:cursor-pointer"
+              />
+
+            </div>
+
             <div className="flex justify-between mt-4">
               <button
                 onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
-                disabled={currentIndex === 0}
+                disabled={currentIndex === 0 || isSaving}
                 className="bg-gray-300 px-4 py-2"
               >
                 Previous
               </button>
               <button
                 onClick={handleSave}
-                className="bg-blue-600 text-white px-4 py-2"
+                className="bg-blue text-white px-4 py-2 flex items-center justify-center gap-2"
                 disabled={isSaving}
               >
-                {isSaving ? "Saving..." : currentIndex === images.length - 1 ? "Finish" : "Save & Next"}
+                {isSaving ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Saving...
+                  </>
+                ) : currentIndex === images.length - 1 ? "Finish" : "Save & Next"}
               </button>
+
             </div>
           </>
         )}

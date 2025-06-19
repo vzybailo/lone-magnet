@@ -65,7 +65,7 @@ $gallery_ids = $product->get_gallery_image_ids();
                         <?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
                     </div>
                     <input type="hidden" name="magnet_photos_data" id="magnet_photos_data" value=""/>
-                    <button id="lone-add-to-cart" type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="bg-blue-700 text-white hover:bg-blue-800 p-2 transition-colors duration-300">
+                    <button id="lone-add-to-cart" type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="bg-blue text-white hover:bg-blue-dark p-2 transition-colors duration-300">
                         Add to cart
                     </button>
                 </div>

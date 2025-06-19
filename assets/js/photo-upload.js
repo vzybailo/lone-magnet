@@ -24781,7 +24781,8 @@
   );
 
   // assets/js/components/utils/getCroppedImg.js
-  function getCroppedImg(imageSrc, croppedAreaPixels) {
+  function getCroppedImg(imageSrc, croppedAreaPixels, onProgress = () => {
+  }) {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.crossOrigin = "anonymous";
@@ -24791,24 +24792,33 @@
         canvas.width = croppedAreaPixels.width;
         canvas.height = croppedAreaPixels.height;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(
-          image,
-          croppedAreaPixels.x,
-          croppedAreaPixels.y,
-          croppedAreaPixels.width,
-          croppedAreaPixels.height,
-          0,
-          0,
-          croppedAreaPixels.width,
-          croppedAreaPixels.height
-        );
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            reject(new Error("Canvas is empty"));
-            return;
+        let progress = 0;
+        const fakeProgressInterval = setInterval(() => {
+          progress += 10;
+          onProgress(Math.min(progress, 90));
+          if (progress >= 90) {
+            clearInterval(fakeProgressInterval);
+            ctx.drawImage(
+              image,
+              croppedAreaPixels.x,
+              croppedAreaPixels.y,
+              croppedAreaPixels.width,
+              croppedAreaPixels.height,
+              0,
+              0,
+              croppedAreaPixels.width,
+              croppedAreaPixels.height
+            );
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error("Canvas is empty"));
+                return;
+              }
+              onProgress(100);
+              resolve(blob);
+            }, "image/jpeg", 0.95);
           }
-          resolve(blob);
-        }, "image/jpeg", 0.95);
+        }, 30);
       };
       image.onerror = () => reject(new Error("Failed to load image"));
     });
@@ -24822,6 +24832,7 @@
     const [zoom, setZoom] = (0, import_react.useState)(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = (0, import_react.useState)(null);
     const [isSaving, setIsSaving] = (0, import_react.useState)(false);
+    const [cropProgress, setCropProgress] = (0, import_react.useState)(0);
     const fileInputRef = (0, import_react.useRef)(null);
     const onCropComplete = (0, import_react.useCallback)((_, areaPixels) => {
       setCroppedAreaPixels(areaPixels);
@@ -24843,9 +24854,10 @@
     };
     const handleSave = async () => {
       setIsSaving(true);
+      setCropProgress(0);
       try {
         const { src } = images[currentIndex];
-        const croppedImage = await getCroppedImg(src, croppedAreaPixels);
+        const croppedImage = await getCroppedImg(src, croppedAreaPixels, setCropProgress);
         const file = new File([croppedImage], `photo-${currentIndex + 1}.jpg`, {
           type: "image/jpeg"
         });
@@ -24871,6 +24883,7 @@
           setCurrentIndex(currentIndex + 1);
           setCrop({ x: 0, y: 0 });
           setZoom(1);
+          setCropProgress(0);
         } else {
           onClose();
         }
@@ -24933,7 +24946,7 @@
           onZoomChange: setZoom,
           onCropComplete
         }
-      )), /* @__PURE__ */ import_react.default.createElement(
+      )), /* @__PURE__ */ import_react.default.createElement("div", { class: "flex items-center mt-2" }, /* @__PURE__ */ import_react.default.createElement("span", { class: "text-sm mr-2" }, "zoom"), /* @__PURE__ */ import_react.default.createElement(
         "input",
         {
           type: "range",
@@ -24942,13 +24955,13 @@
           step: 0.1,
           value: zoom,
           onChange: (e) => setZoom(e.target.value),
-          className: "w-full mt-2"
+          className: "w-full h-1 appearance-none bg-gray-300 rounded-sm outline-none transition-all duration-200\r\n                          [&::-webkit-slider-thumb]:appearance-none\r\n                          [&::-webkit-slider-thumb]:w-3\r\n                          [&::-webkit-slider-thumb]:h-3\r\n                          [&::-webkit-slider-thumb]:bg-grey\r\n                          [&::-webkit-slider-thumb]:rounded-full\r\n                          [&::-webkit-slider-thumb]:cursor-pointer\r\n                          [&::-moz-range-thumb]:appearance-none\r\n                          [&::-moz-range-thumb]:w-3\r\n                          [&::-moz-range-thumb]:h-3\r\n                          [&::-moz-range-thumb]:bg-grey\r\n                          [&::-moz-range-thumb]:rounded-full\r\n                          [&::-moz-range-thumb]:cursor-pointer"
         }
-      ), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between mt-4" }, /* @__PURE__ */ import_react.default.createElement(
+      )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between mt-4" }, /* @__PURE__ */ import_react.default.createElement(
         "button",
         {
           onClick: () => setCurrentIndex(Math.max(0, currentIndex - 1)),
-          disabled: currentIndex === 0,
+          disabled: currentIndex === 0 || isSaving,
           className: "bg-gray-300 px-4 py-2"
         },
         "Previous"
@@ -24956,10 +24969,37 @@
         "button",
         {
           onClick: handleSave,
-          className: "bg-blue-600 text-white px-4 py-2",
+          className: "bg-blue text-white px-4 py-2 flex items-center justify-center gap-2",
           disabled: isSaving
         },
-        isSaving ? "Saving..." : currentIndex === images.length - 1 ? "Finish" : "Save & Next"
+        isSaving ? /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement(
+          "svg",
+          {
+            className: "animate-spin h-5 w-5 text-white",
+            xmlns: "http://www.w3.org/2000/svg",
+            fill: "none",
+            viewBox: "0 0 24 24"
+          },
+          /* @__PURE__ */ import_react.default.createElement(
+            "circle",
+            {
+              className: "opacity-25",
+              cx: "12",
+              cy: "12",
+              r: "10",
+              stroke: "currentColor",
+              strokeWidth: "4"
+            }
+          ),
+          /* @__PURE__ */ import_react.default.createElement(
+            "path",
+            {
+              className: "opacity-75",
+              fill: "currentColor",
+              d: "M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            }
+          )
+        ), "Saving...") : currentIndex === images.length - 1 ? "Finish" : "Save & Next"
       )))
     ));
   }

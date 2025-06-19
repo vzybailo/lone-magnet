@@ -48,7 +48,7 @@ function render_custom_upload_button() {
     global $product;
     $product_id = $product->get_id();
 
-    echo '<button type="button" class="bg-teal-500 text-white hover:bg-teal-600 w-full p-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
+    echo '<button type="button" class="bg-wine text-white hover:bg-wine-dark w-full p-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
     echo '<div id="custom-photo-modal-root" data-product-id="' . esc_attr($product_id) . '"></div>';
     echo '<div class="lone-alert text-sm"></div>';
 }

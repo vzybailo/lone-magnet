@@ -13,7 +13,7 @@ do_action( 'woocommerce_before_cart' );
     <p class="text-gray-600 mb-6">
       Looks like you haven’t added anything yet. Let’s fix that!
     </p>
-    <a href="/products" class="bg-blue-700 text-white hover:bg-blue-800 py-2 px-4 transition-colors duration-300">Continue shopping</a>
+    <a href="/products" class="bg-blue text-white hover:bg-blue-dark py-2 px-4 transition-colors duration-300">Continue shopping</a>
   </div>
 
   <div class="mt-20 text-left max-w-6xl max-sm:px-4">

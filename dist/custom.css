@@ -227,12 +227,7 @@ label.wc-block-components-radio-control__option--checked-option-highlighted,
   transition: 0.3s;
 }
 .menu-item.current-menu-item {
-  border-bottom: 1px gray solid;
-}
-.menu-item:hover {
-  border-bottom: 1px gray solid;
-  transition: 0.3s;
-  box-sizing: border-box;
+  font-weight: 600;
 }
 @media (max-width: 768px) {
   .wp-block-woocommerce-checkout-order-summary-block {

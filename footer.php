@@ -35,10 +35,10 @@
         <p class="mb-2 text-sm">Join our newsletter for exclusive offers and updates.</p>
         <form action="#" method="post" class="mb-4">
           <input type="email" name="email" placeholder="Your email"
-            class="w-full px-3 py-2 text-sm bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 text-sm bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-light"
             required>
           <button type="submit"
-            class="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2">Subscribe</button>
+            class="mt-2 w-full bg-blue-dark border border-transparent hover:border-grey transition text-white py-2">Subscribe</button>
         </form>
         <div class="flex space-x-4 mt-2">
           <a href="#" class="socials-icon" aria-label="Instagram">
