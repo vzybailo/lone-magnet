@@ -245,8 +245,11 @@ add_action('init', function () {
 
         // Генерация PDF
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetMargins(0, 0, 0);
         $pdf->SetFont('dejavusans', '', 10);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetAutoPageBreak(false, 15);
         $pdf->AddPage();
 
         $pdf->writeHTML($html, true, false, true, false, '');
