@@ -124,18 +124,6 @@ function save_uploaded_photos_to_cart($cart_item_data, $product_id, $variation_i
     return $cart_item_data;
 }
 
-add_filter('woocommerce_get_item_data', 'display_photos_in_cart', 10, 2);
-function display_photos_in_cart($item_data, $cart_item) {
-    if (isset($cart_item['magnet_photos'])) {
-        $photos = $cart_item['magnet_photos'];
-        $item_data[] = array(
-            'key' => __('Uploaded Photos', 'your-textdomain'),
-            'value' => sprintf('%d photo(s) uploaded', count($photos))
-        );
-    }
-    return $item_data;
-}
-
 add_action('woocommerce_checkout_create_order_line_item', 'save_photos_to_order', 10, 4);
 function save_photos_to_order($item, $cart_item_key, $values, $order) {
     if (isset($values['magnet_photos'])) {
@@ -223,36 +211,45 @@ add_action('init', function () {
 
         require_once get_template_directory() . '/tcpdf/tcpdf.php';
 
-        // Сбор фото
-        $photos = [];
+        // Сбор всех фото из заказа
+        $all_photos = [];
         foreach ($order->get_items() as $item_id => $item) {
             $item_photos = wc_get_order_item_meta($item_id, 'magnet_photos');
             if (is_array($item_photos)) {
                 foreach ($item_photos as $photo) {
                     if (!empty($photo['url'])) {
-                        $photos[] = esc_url($photo['url']);
+                        $all_photos[] = esc_url($photo['url']);
                     }
                 }
             }
         }
 
-        $photos = array_slice($photos, 0, 9);
+        if (empty($all_photos)) {
+            wp_die('No photos found in order.');
+        }
 
-        // 👉 Загрузка HTML-шаблона
-        ob_start();
-        include get_template_directory() . '/pdf-template/template.php'; 
-        $html = ob_get_clean();
+        // Разбиваем все фото по 9 на страницу
+        $photo_chunks = array_chunk($all_photos, 9);
 
-        // Генерация PDF
+        // Инициализация TCPDF
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetFont('dejavusans', '', 10);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
         $pdf->SetAutoPageBreak(false, 15);
-        $pdf->AddPage();
 
-        $pdf->writeHTML($html, true, false, true, false, '');
+        foreach ($photo_chunks as $photos) {
+            $pdf->AddPage();
+
+            // Передаём $photos и $order_id в шаблон
+            ob_start();
+            include get_template_directory() . '/pdf-template/template.php';
+            $html = ob_get_clean();
+
+            $pdf->writeHTML($html, true, false, true, false, '');
+        }
+
         $pdf->Output("order-{$order_id}.pdf", 'I');
         exit;
     }
