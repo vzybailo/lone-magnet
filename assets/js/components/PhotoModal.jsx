@@ -9,6 +9,7 @@ export default function PhotoModal({ onClose, onComplete }) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [cropProgress, setCropProgress] = useState(0);
   const fileInputRef = useRef(null);
 
@@ -18,18 +19,27 @@ export default function PhotoModal({ onClose, onComplete }) {
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files || []);
-    const imagePromises = files.map(file => {
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ src: reader.result, file });
-        reader.readAsDataURL(file);
+    if (files.length === 0) return;
+
+    setIsLoadingImages(true);
+    try {
+      const imagePromises = files.map(file => {
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve({ src: reader.result, file });
+          reader.readAsDataURL(file);
+        });
       });
-    });
-    const loadedImages = await Promise.all(imagePromises);
-    setImages(loadedImages);
-    setCurrentIndex(0);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
+      const loadedImages = await Promise.all(imagePromises);
+      setImages(loadedImages);
+      setCurrentIndex(0);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    } catch (err) {
+      console.error("Ошибка при загрузке файлов", err);
+    } finally {
+      setIsLoadingImages(false);
+    }
   };
 
   const handleSave = async () => {
@@ -105,11 +115,13 @@ export default function PhotoModal({ onClose, onComplete }) {
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
       >
+        {/* Кнопка закрытия */}
         <button onClick={onClose} className="absolute top-2 right-2">✕</button>
 
         <h3 className="font-bold text-center text-xl">Upload your photos</h3>
         <p className="text-center font-light mb-2">JPG, JPEG or PNG</p>
 
+        {/* Блок загрузки файлов */}
         {images.length === 0 ? (
           <div
             className="border-dashed border-2 border-gray-300 px-4 py-12 text-center text-sm cursor-pointer"
@@ -141,8 +153,9 @@ export default function PhotoModal({ onClose, onComplete }) {
                 onCropComplete={onCropComplete}
               />
             </div>
-            <div class="flex items-center mt-2">
-              <span class="text-sm mr-2">zoom</span>
+
+            <div className="flex items-center mt-2">
+              <span className="text-sm mr-2">zoom</span>
               <input
                 type="range"
                 min={1}
@@ -151,20 +164,19 @@ export default function PhotoModal({ onClose, onComplete }) {
                 value={zoom}
                 onChange={(e) => setZoom(e.target.value)}
                 className="w-full h-1 appearance-none bg-gray-300 rounded-sm outline-none transition-all duration-200
-                          [&::-webkit-slider-thumb]:appearance-none
-                          [&::-webkit-slider-thumb]:w-3
-                          [&::-webkit-slider-thumb]:h-3
-                          [&::-webkit-slider-thumb]:bg-grey
-                          [&::-webkit-slider-thumb]:rounded-full
-                          [&::-webkit-slider-thumb]:cursor-pointer
-                          [&::-moz-range-thumb]:appearance-none
-                          [&::-moz-range-thumb]:w-3
-                          [&::-moz-range-thumb]:h-3
-                          [&::-moz-range-thumb]:bg-grey
-                          [&::-moz-range-thumb]:rounded-full
-                          [&::-moz-range-thumb]:cursor-pointer"
+                  [&::-webkit-slider-thumb]:appearance-none
+                  [&::-webkit-slider-thumb]:w-3
+                  [&::-webkit-slider-thumb]:h-3
+                  [&::-webkit-slider-thumb]:bg-grey
+                  [&::-webkit-slider-thumb]:rounded-full
+                  [&::-webkit-slider-thumb]:cursor-pointer
+                  [&::-moz-range-thumb]:appearance-none
+                  [&::-moz-range-thumb]:w-3
+                  [&::-moz-range-thumb]:h-3
+                  [&::-moz-range-thumb]:bg-grey
+                  [&::-moz-range-thumb]:rounded-full
+                  [&::-moz-range-thumb]:cursor-pointer"
               />
-
             </div>
 
             <div className="flex justify-between mt-4">
@@ -206,10 +218,38 @@ export default function PhotoModal({ onClose, onComplete }) {
                   </>
                 ) : currentIndex === images.length - 1 ? "Finish" : "Save & Next"}
               </button>
-
             </div>
           </>
         )}
+
+        {/* Оверлей загрузки фото */}
+          {isLoadingImages && (
+            <div className="absolute inset-0 bg-white bg-opacity-100 z-50 flex flex-col items-center justify-center text-center px-6">
+              <div className="relative w-12 h-12 mb-4">
+                <svg
+                  className="absolute inset-0 w-full h-full animate-spin text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+              </div>
+              <p className="text-base font-medium text-gray-700">Loading your photos...</p>
+              <p className="text-sm text-gray-400 mt-1">Please wait a moment</p>
+            </div>
+          )}
       </div>
     </div>
   );

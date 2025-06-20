@@ -24832,6 +24832,7 @@
     const [zoom, setZoom] = (0, import_react.useState)(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = (0, import_react.useState)(null);
     const [isSaving, setIsSaving] = (0, import_react.useState)(false);
+    const [isLoadingImages, setIsLoadingImages] = (0, import_react.useState)(false);
     const [cropProgress, setCropProgress] = (0, import_react.useState)(0);
     const fileInputRef = (0, import_react.useRef)(null);
     const onCropComplete = (0, import_react.useCallback)((_, areaPixels) => {
@@ -24839,18 +24840,26 @@
     }, []);
     const handleFileChange = async (e) => {
       const files = Array.from(e.target.files || []);
-      const imagePromises = files.map((file) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve({ src: reader.result, file });
-          reader.readAsDataURL(file);
+      if (files.length === 0) return;
+      setIsLoadingImages(true);
+      try {
+        const imagePromises = files.map((file) => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({ src: reader.result, file });
+            reader.readAsDataURL(file);
+          });
         });
-      });
-      const loadedImages = await Promise.all(imagePromises);
-      setImages(loadedImages);
-      setCurrentIndex(0);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
+        const loadedImages = await Promise.all(imagePromises);
+        setImages(loadedImages);
+        setCurrentIndex(0);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+      } catch (err) {
+        console.error("\u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0435 \u0444\u0430\u0439\u043B\u043E\u0432", err);
+      } finally {
+        setIsLoadingImages(false);
+      }
     };
     const handleSave = async () => {
       setIsSaving(true);
@@ -24946,7 +24955,7 @@
           onZoomChange: setZoom,
           onCropComplete
         }
-      )), /* @__PURE__ */ import_react.default.createElement("div", { class: "flex items-center mt-2" }, /* @__PURE__ */ import_react.default.createElement("span", { class: "text-sm mr-2" }, "zoom"), /* @__PURE__ */ import_react.default.createElement(
+      )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex items-center mt-2" }, /* @__PURE__ */ import_react.default.createElement("span", { className: "text-sm mr-2" }, "zoom"), /* @__PURE__ */ import_react.default.createElement(
         "input",
         {
           type: "range",
@@ -24955,7 +24964,7 @@
           step: 0.1,
           value: zoom,
           onChange: (e) => setZoom(e.target.value),
-          className: "w-full h-1 appearance-none bg-gray-300 rounded-sm outline-none transition-all duration-200\r\n                          [&::-webkit-slider-thumb]:appearance-none\r\n                          [&::-webkit-slider-thumb]:w-3\r\n                          [&::-webkit-slider-thumb]:h-3\r\n                          [&::-webkit-slider-thumb]:bg-grey\r\n                          [&::-webkit-slider-thumb]:rounded-full\r\n                          [&::-webkit-slider-thumb]:cursor-pointer\r\n                          [&::-moz-range-thumb]:appearance-none\r\n                          [&::-moz-range-thumb]:w-3\r\n                          [&::-moz-range-thumb]:h-3\r\n                          [&::-moz-range-thumb]:bg-grey\r\n                          [&::-moz-range-thumb]:rounded-full\r\n                          [&::-moz-range-thumb]:cursor-pointer"
+          className: "w-full h-1 appearance-none bg-gray-300 rounded-sm outline-none transition-all duration-200\r\n                  [&::-webkit-slider-thumb]:appearance-none\r\n                  [&::-webkit-slider-thumb]:w-3\r\n                  [&::-webkit-slider-thumb]:h-3\r\n                  [&::-webkit-slider-thumb]:bg-grey\r\n                  [&::-webkit-slider-thumb]:rounded-full\r\n                  [&::-webkit-slider-thumb]:cursor-pointer\r\n                  [&::-moz-range-thumb]:appearance-none\r\n                  [&::-moz-range-thumb]:w-3\r\n                  [&::-moz-range-thumb]:h-3\r\n                  [&::-moz-range-thumb]:bg-grey\r\n                  [&::-moz-range-thumb]:rounded-full\r\n                  [&::-moz-range-thumb]:cursor-pointer"
         }
       )), /* @__PURE__ */ import_react.default.createElement("div", { className: "flex justify-between mt-4" }, /* @__PURE__ */ import_react.default.createElement(
         "button",
@@ -25000,7 +25009,34 @@
             }
           )
         ), "Saving...") : currentIndex === images.length - 1 ? "Finish" : "Save & Next"
-      )))
+      ))),
+      isLoadingImages && /* @__PURE__ */ import_react.default.createElement("div", { className: "absolute inset-0 bg-white bg-opacity-100 z-50 flex flex-col items-center justify-center text-center px-6" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "relative w-12 h-12 mb-4" }, /* @__PURE__ */ import_react.default.createElement(
+        "svg",
+        {
+          className: "absolute inset-0 w-full h-full animate-spin text-gray-400",
+          viewBox: "0 0 24 24",
+          fill: "none"
+        },
+        /* @__PURE__ */ import_react.default.createElement(
+          "circle",
+          {
+            className: "opacity-25",
+            cx: "12",
+            cy: "12",
+            r: "10",
+            stroke: "currentColor",
+            strokeWidth: "4"
+          }
+        ),
+        /* @__PURE__ */ import_react.default.createElement(
+          "path",
+          {
+            className: "opacity-75",
+            fill: "currentColor",
+            d: "M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          }
+        )
+      )), /* @__PURE__ */ import_react.default.createElement("p", { className: "text-base font-medium text-gray-700" }, "Loading your photos..."), /* @__PURE__ */ import_react.default.createElement("p", { className: "text-sm text-gray-400 mt-1" }, "Please wait a moment"))
     ));
   }
 
