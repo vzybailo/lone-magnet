@@ -624,3 +624,41 @@ add_action('wp_head', function () {
     <!-- End Meta Pixel Code -->
   <?php
 });
+
+
+add_action('rest_api_init', function() {
+    register_rest_route('custom/v1', '/upload', [
+        'methods' => 'POST',
+        'callback' => 'my_public_upload',
+        'permission_callback' => '__return_true', // открытый, но можно добавить проверку ключа
+    ]);
+});
+
+function my_public_upload($request) {
+    if (!isset($_FILES['file'])) {
+        return new WP_Error('no_file', 'No file uploaded', ['status' => 400]);
+    }
+
+    $file = $_FILES['file'];
+    $overrides = ['test_form' => false]; // отключаем проверку формы
+    $uploaded = wp_handle_upload($file, $overrides);
+
+    if (isset($uploaded['error'])) {
+        return new WP_Error('upload_error', $uploaded['error'], ['status' => 500]);
+    }
+
+    $attachment = [
+        'post_mime_type' => $uploaded['type'],
+        'post_title'     => sanitize_file_name($file['name']),
+        'post_status'    => 'inherit',
+    ];
+    $attach_id = wp_insert_attachment($attachment, $uploaded['file']);
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
+    $attach_data = wp_generate_attachment_metadata($attach_id, $uploaded['file']);
+    wp_update_attachment_metadata($attach_id, $attach_data);
+
+    return [
+        'id'  => $attach_id,
+        'url' => $uploaded['url'],
+    ];
+}
