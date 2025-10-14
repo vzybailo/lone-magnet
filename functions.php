@@ -602,14 +602,6 @@ add_filter( 'wc_stripe_upe_params', function ( $stripe_params ) {
 	return $stripe_params;
 } );
 
-// allow all formats images
-function add_custom_upload_mimes($mimes) {
-    $mimes['heic'] = 'image/heic';
-    $mimes['heif'] = 'image/heif';
-    return $mimes;
-}
-add_filter('upload_mimes', 'add_custom_upload_mimes');
-
 // fb pixel
 add_action('wp_head', function () {
   ?>
