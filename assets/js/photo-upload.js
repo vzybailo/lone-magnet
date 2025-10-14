@@ -24882,8 +24882,8 @@
         const data = await response.json();
         onComplete({
           id: data.id,
-          url: data.source_url,
-          title: data.title.rendered
+          url: data.source_url || data.url,
+          title: data.title?.rendered || `Photo ${currentIndex + 1}`
         });
         if (currentIndex < images.length - 1) {
           setCurrentIndex(currentIndex + 1);
