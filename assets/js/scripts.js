@@ -143,8 +143,8 @@ document.addEventListener('DOMContentLoaded', function () {
 })
 
 function adjustMainMargin() {
-  const header = document.querySelector('.header_main');
-  const main = document.querySelector('.main-page');
+  const header = document.querySelector('.header__main');
+  const main = document.querySelector('.home-page');
   if (header && main) {
     main.style.marginTop = `-${header.offsetHeight}px`;
   }

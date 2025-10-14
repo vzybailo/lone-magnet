@@ -52,7 +52,7 @@
     <div class="flex justify-between border-t border-gray-700 pt-4 mt-4 text-xs text-gray-400 max-md:flex-col">
       <div class="space-y-1 max-md:text-center max-md:mb-4">
         <p class="mb-2">&copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>. All rights reserved.</p>
-        <p>🔒 Secure checkout & handcrafted quality — proudly made in Texas 🇺🇸Texas</p>
+        <p>🔒 Secure checkout & handcrafted quality — proudly made in Texas 🇺🇸</p>
       </div>
 
       <div class="flex flex-col justify-between flex-wrap items-end gap-1">
