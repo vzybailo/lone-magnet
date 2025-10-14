@@ -25,7 +25,7 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./        # локальная папка темы
+          local-dir: ./ 
           server-dir: /domains/lonemagnet.com/public_html/wp-content/themes/lone-magnet/
           exclude: |
             node_modules
