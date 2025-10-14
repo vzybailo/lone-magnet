@@ -34,3 +34,5 @@ jobs:
           port: 21
           local-dir: ./
           server-dir: /domains/lonemagnet.com/public_html/wp-content/themes/lone-magnet/
+          exclude: |
+           tcpdf/
