@@ -142,6 +142,17 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 })
 
+function adjustMainMargin() {
+  const header = document.querySelector('.header_main');
+  const main = document.querySelector('.main-page');
+  if (header && main) {
+    main.style.marginTop = `-${header.offsetHeight}px`;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', adjustMainMargin);
+window.addEventListener('resize', adjustMainMargin);
+
 
 
 
