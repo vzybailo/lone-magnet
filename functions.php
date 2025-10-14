@@ -624,4 +624,3 @@ add_action('wp_head', function () {
     <!-- End Meta Pixel Code -->
   <?php
 });
-
