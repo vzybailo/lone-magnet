@@ -1,9 +1,9 @@
-name: Deploy to Hostinger
+name: Deploy Theme
 
 on:
   push:
     branches:
-      - prod
+      - prod  # деплой только при пуше в prod
 
 jobs:
   deploy:
@@ -13,29 +13,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build
-
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: ${{ secrets.HOSTINGER_FTP_HOST }}
+          username: ${{ secrets.HOSTINGER_FTP_USER }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           protocol: ftp
           port: 21
           local-dir: ./
           server-dir: /domains/lonemagnet.com/public_html/wp-content/themes/lone-magnet/
           exclude: |
-             node_modules/
-             .git/
-             .github/
-             tcpdf/
+            lone-magnet/node_modules/
+            lone-magnet/.git/
+            lone-magnet/.github/
+            lone-magnet/tcpdf/
+          dangerous-clean-slate: true
