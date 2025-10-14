@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "./utils/getCroppedImg";
+import heic2any from "heic2any";
 
 export default function PhotoModal({ onClose, onComplete }) {
   const [images, setImages] = useState([]);
@@ -23,13 +24,28 @@ export default function PhotoModal({ onClose, onComplete }) {
 
     setIsLoadingImages(true);
     try {
-      const imagePromises = files.map(file => {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve({ src: reader.result, file });
-          reader.readAsDataURL(file);
-        });
-      });
+const imagePromises = files.map(async (file) => {
+  // Конвертация HEIC/HEIF в JPEG
+  if (file.type === "image/heic" || file.type === "image/heif") {
+    const blob = await heic2any({ blob: file, toType: "image/jpeg" });
+    const convertedFile = new File(
+      [blob],
+      file.name.replace(/\..+$/, ".jpg"),
+      { type: "image/jpeg" }
+    );
+    const src = URL.createObjectURL(blob);
+    return { src, file: convertedFile };
+  }
+
+  // Остальные форматы: читаем через FileReader
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ src: reader.result, file });
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+});
+
       const loadedImages = await Promise.all(imagePromises);
       setImages(loadedImages);
       setCurrentIndex(0);

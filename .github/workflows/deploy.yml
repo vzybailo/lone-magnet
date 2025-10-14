@@ -28,4 +28,3 @@ jobs:
             lone-magnet/.git/
             lone-magnet/.github/
             lone-magnet/tcpdf/
-          dangerous-clean-slate: true
