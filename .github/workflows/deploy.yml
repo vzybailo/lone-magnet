@@ -1,35 +1,36 @@
-name: Deploy WordPress Theme to Hostinger
+name: Deploy to Hostinger
 
 on:
   push:
     branches:
-      - prod  # деплой только при пуше в prod
+      - prod
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
 
       - name: Build project
-        run: npm run build  # если нужно, иначе можно убрать
+        run: npm run build
 
       - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./ 
+          server: ${{ secrets.HOSTINGER_FTP_HOST }}
+          username: ${{ secrets.HOSTINGER_FTP_USER }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./lone-magnet/
           server-dir: /domains/lonemagnet.com/public_html/wp-content/themes/lone-magnet/
-          exclude: |
-            node_modules
-            .git*
-            .github
-            package-lock.json
-            package.json
