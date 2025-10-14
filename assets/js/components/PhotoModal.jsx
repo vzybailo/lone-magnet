@@ -76,10 +76,16 @@ export default function PhotoModal({ onClose, onComplete }) {
       if (!response.ok) throw new Error("Upload error");
 
       const data = await response.json();
+      // onComplete({
+      //   id: data.id,
+      //   url: data.source_url,
+      //   title: data.title.rendered,
+      // });
+
       onComplete({
         id: data.id,
-        url: data.source_url,
-        title: data.title.rendered,
+        url: data.source_url || data.url,
+        title: data.title?.rendered || `Photo ${currentIndex + 1}`,
       });
 
       if (currentIndex < images.length - 1) {
