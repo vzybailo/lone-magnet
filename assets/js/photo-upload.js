@@ -24874,11 +24874,8 @@
         formData.append("file", file);
         formData.append("title", `Photo ${currentIndex + 1}`);
         formData.append("alt_text", `Uploaded photo ${currentIndex + 1}`);
-        const response = await fetch("/wp-json/wp/v2/media", {
+        const response = await fetch("/wp-json/custom/v1/upload", {
           method: "POST",
-          headers: {
-            "X-WP-Nonce": window.wpApiSettings?.nonce || ""
-          },
           body: formData
         });
         if (!response.ok) throw new Error("Upload error");
