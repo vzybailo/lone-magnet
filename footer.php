@@ -26,7 +26,7 @@
           </a>
         </div>
       </div>
-      <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 gap-4">
         <div>
           <h4 class="text-white font-semibold mb-3">Navigation</h4>
           <div>
