@@ -560,9 +560,19 @@ span#reply-title {
   border-color: #265887;
   background-color: #dbe9f9; 
 }
+.swiper-slide {
+  height: auto !important;
+}
 div.swiper-slide__item {
   margin-bottom: 40px;
   border-radius: 6px;
+}
+.line-clamp-4 {
+  display: -webkit-box;
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .review__text {
   font-style: italic;
