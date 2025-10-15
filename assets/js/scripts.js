@@ -67,8 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
-
-
 document.addEventListener('DOMContentLoaded', () => {
   const debounceDelay = 500;
   let debounceTimer;
@@ -152,6 +150,128 @@ function adjustMainMargin() {
 
 window.addEventListener('DOMContentLoaded', adjustMainMargin);
 window.addEventListener('resize', adjustMainMargin);
+
+//swiper slider
+document.addEventListener("DOMContentLoaded", function () {
+  new Swiper(".mySwiper", {
+      loop: true,
+      speed: 1000, 
+      autoplay: {
+          delay: 5000,
+          disableOnInteraction: false,
+      },
+      slidesPerView: 1,
+      spaceBetween: 26,
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true, 
+      },
+      breakpoints: {
+          768: {
+              slidesPerView: 2,
+          },
+          1024: {
+              slidesPerView: 3,
+          },
+      },
+  });
+});
+
+// change price for the bulk order
+document.addEventListener('DOMContentLoaded', () => {
+  const priceElement = document.querySelector('.lone-regular-price .woocommerce-Price-amount');
+  const salePriceElement = document.querySelector('.lone-sale-price .woocommerce-Price-amount');
+  const radios = document.querySelectorAll('.bulk-quantity-buttons input[type="radio"]');
+
+  if (!priceElement || radios.length === 0) return;
+
+  const basePrice = parsePrice(priceElement.textContent || '');
+  const baseSalePrice = salePriceElement ? parsePrice(salePriceElement.textContent || '') : null;
+
+  function parsePrice(text) {
+    const number = text.replace(/[^0-9.,]/g, '').replace(',', '.');
+    return parseFloat(number) || 0;
+  }
+
+  function formatPrice(price) {
+    return '$' + price.toFixed(2);
+  }
+
+  function updatePrice(qty) {
+    const newPrice = basePrice * qty;
+    priceElement.textContent = formatPrice(newPrice);
+  }
+
+  function updateSalePrice(qty) {
+    if (salePriceElement && baseSalePrice !== null) {
+      const newSalePrice = baseSalePrice * qty;
+      salePriceElement.textContent = formatPrice(newSalePrice);
+    }
+  }
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const qty = parseInt(e.target.value, 10) || 1;
+      updatePrice(qty);
+      updateSalePrice(qty);
+    });
+
+    // Обновляем цену сразу при загрузке, если radio выбран
+    if (radio.checked) {
+      const qty = parseInt(radio.value, 10) || 1;
+      updatePrice(qty);
+      updateSalePrice(qty);
+    }
+  });
+});
+
+// block scroll
+document.addEventListener('DOMContentLoaded', () => {
+  const parent = document.querySelector('#custom-photo-modal-root')
+  const addPhotoBtn = document.querySelector('#custom-photo-upload')
+
+  const lock = () => {
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+  }
+  const unlock = () => {
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+  }
+
+  addPhotoBtn?.addEventListener('click', () => {
+    // ждём пока модалка реально попадёт в DOM
+    const wait = () => {
+      const modal = parent?.querySelector(':scope > .inset-0') // прямой потомок
+      if (modal) {
+        lock()
+        // когда модалку удалят — вернём скролл
+        const mo = new MutationObserver(() => {
+          if (!parent.querySelector(':scope > .inset-0')) {
+            unlock()
+            mo.disconnect()
+          }
+        })
+        mo.observe(parent, { childList: true })
+      } else {
+        requestAnimationFrame(wait)
+      }
+    }
+    wait()
+  })
+})
+
+// show more review btn
+document.querySelectorAll('.show-more').forEach(btn => {
+  const text = btn.previousElementSibling;
+  if (text.scrollHeight > text.clientHeight) btn.classList.remove('hidden');
+  btn.addEventListener('click', () => {
+    text.classList.toggle('line-clamp-4');
+    btn.textContent = text.classList.contains('line-clamp-4') ? 'Show more' : 'Show less';
+  });
+});
+
+
 
 
 

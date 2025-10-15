@@ -78,51 +78,64 @@ get_header();
                     'status'  => 'approve'
                 ) );
 
-                foreach ( $reviews as $review ) :
-                    $image_id = get_comment_meta( $review->comment_ID, 'ivole_review_image2', true );
-                    if ( empty( $image_id ) ) continue;
+              foreach ( $reviews as $review ) :
+                  $image_id  = get_comment_meta( $review->comment_ID, 'ivole_review_image2', true );
+                  $image_url = $image_id ? wp_get_attachment_url( $image_id ) : ''; // если нет фото, пустая строка
+                  $rating    = intval( get_comment_meta( $review->comment_ID, 'rating', true ) );
 
-                    $image_url = wp_get_attachment_url( $image_id );
-                    if ( !$image_url ) continue;
+                  $has_reviews = true;
+              ?>
+                  <div class="swiper-slide">
+                    <div class="swiper-slide__item bg-white p-6 shadow-lg mx-auto border border-gray-200 flex flex-col h-full relative">
 
-                    $rating = intval( get_comment_meta( $review->comment_ID, 'rating', true ) );
+                      <div class="review__quotes absolute top-4 left-4 pointer-events-none">
+                        <svg width="30px" height="30px" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M518.474,105.344C305.831,120.286,0.168,154.236,0,570.687v523.97h474.504v-560.61H316.946C306.965,384.354,430.23,345.701,564.274,316.03L518.474,105.344z M1154.198,105.344c-212.643,14.942-518.306,48.893-518.473,465.343v523.97h474.505v-560.61H952.672C942.689,384.354,1065.956,345.701,1200,316.03L1154.198,105.344L1154.198,105.344z"/>
+                                    </svg>
+                      </div>
 
-                    $has_reviews = true;
-            ?>
-                <div class="swiper-slide">
-                  <div class="swiper-slide__item bg-white p-6 shadow-lg mx-auto border border-gray-200 flex flex-col h-full relative">
+                      <div class="flex justify-center mb-3 mt-2 z-10">
+                        <?php for ( $i = 1; $i <= 5; $i++ ) : ?>
+                          <svg class="w-5 h-5 text-gold <?php echo $i > $rating ? 'opacity-30' : ''; ?>" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.222 3.775h3.974c.969 0 1.371 1.24.588 1.81l-3.214 2.334 1.222 3.775c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.214 2.334c-.785.57-1.84-.197-1.54-1.118l1.222-3.775-3.214-2.334c-.783-.57-.38-1.81.588-1.81h3.974l1.222-3.775z"/>
+                          </svg>
+                        <?php endfor; ?>
+                      </div>
 
-                    <div class="review__quotes absolute top-4 left-4 pointer-events-none">
-                      <svg width="30px" height="30px" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M518.474,105.344C305.831,120.286,0.168,154.236,0,570.687v523.97h474.504v-560.61H316.946C306.965,384.354,430.23,345.701,564.274,316.03L518.474,105.344z M1154.198,105.344c-212.643,14.942-518.306,48.893-518.473,465.343v523.97h474.505v-560.61H952.672C942.689,384.354,1065.956,345.701,1200,316.03L1154.198,105.344L1154.198,105.344z"/>
-                      </svg>
+                      <div class="flex justify-center mb-3 mt-2 z-10">
+                        <?php for ( $i = 1; $i <= 5; $i++ ) : ?>
+                          <svg class="w-5 h-5 text-gold <?php echo $i > $rating ? 'opacity-30' : ''; ?>" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="..."/>
+                          </svg>
+                        <?php endfor; ?>
+                      </div>
+
+                      <div class="h-full">
+                        <div class="h-full flex flex-col justify-center">
+                          <?php if ( $image_url ) : ?>
+                          <div class="flex justify-center mb-2 z-10">
+                            <a href="<?php echo esc_url( $image_url ); ?>" class="glightbox" data-gallery="review-<?php echo $review->comment_ID; ?>">
+                              <img src="<?php echo esc_url( $image_url ); ?>" alt="Review image" class="w-40 h-40 object-cover rounded">
+                            </a>
+                          </div>
+                          <?php endif; ?>
+
+                          <p class="review__text text-gray-800 italic relative z-10 text-center px-4 line-clamp-4">
+                            "<?php echo esc_html( $review->comment_content ); ?>"
+                          </p>
+                          <button class="show-more text-blue-500 text-sm mt-1 hidden underline">Show more</button>
+
+                          <div class="mt-2 text-center text-sm z-10">
+                            <p class="font-semibold"><?php echo esc_html( $review->comment_author ); ?></p>
+                            <p class="text-gray-500"><?php echo get_comment_date( 'F j, Y', $review->comment_ID ); ?></p>
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
-
-                    <div class="flex justify-center mb-3 mt-2 z-10">
-                      <?php for ( $i = 1; $i <= 5; $i++ ) : ?>
-                        <svg class="w-5 h-5 text-gold <?php echo $i > $rating ? 'opacity-30' : ''; ?>" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.222 3.775h3.974c.969 0 1.371 1.24.588 1.81l-3.214 2.334 1.222 3.775c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.214 2.334c-.785.57-1.84-.197-1.54-1.118l1.222-3.775-3.214-2.334c-.783-.57-.38-1.81.588-1.81h3.974l1.222-3.775z"/>
-                        </svg>
-                      <?php endfor; ?>
-                    </div>
-
-                    <div class="flex justify-center mb-2 z-10">
-                      <a href="<?php echo esc_url( $image_url ); ?>" class="glightbox" data-gallery="review-<?php echo $review->comment_ID; ?>">
-                        <img src="<?php echo esc_url( $image_url ); ?>" alt="Review image" class="w-40 h-40 object-cover rounded">
-                      </a>
-                    </div>
-
-                    <p class="review__text text-gray-800 italic relative z-10 text-center px-4">"<?php echo esc_html( $review->comment_content ); ?>"</p>
-
-                    <div class="mt-2 text-center text-sm z-10">
-                      <p class="font-semibold"><?php echo esc_html( $review->comment_author ); ?></p>
-                      <p class="text-gray-500"><?php echo get_comment_date( 'F j, Y', $review->comment_ID ); ?></p>
-                    </div>
-
                   </div>
-                </div>
-            <?php
-                endforeach;
+              <?php
+              endforeach;
             endwhile;
             wp_reset_postdata();
             ?>
