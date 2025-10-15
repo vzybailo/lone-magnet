@@ -25045,8 +25045,9 @@
     const [showMsg, setShowMsg] = (0, import_react2.useState)(false);
     const container2 = document.getElementById("custom-photo-modal-root");
     const productId = container2?.dataset?.productId || "unknown";
+    const mode = container2?.dataset?.mode || "default";
     const STORAGE_KEY = `magnet_photos_product_${productId}`;
-    const requiredPhotos = quantity * 9;
+    const requiredPhotos = mode === "bulk" ? 1 : quantity * 9;
     (0, import_react2.useEffect)(() => {
       const input = document.querySelector(".mag-quantity");
       const plusBtn = document.querySelector("#increase-number");
