@@ -11,7 +11,7 @@ $categories = wp_get_post_terms( get_the_ID(), 'product_cat', ['fields' => 'slug
 
 <div class="container">
     <div class="flex pt-12 max-md:flex-col max-sm:px-4 mb-12">
-        <div class="w-2/3 grid grid-cols-2 gap-4 h-[fit-content] mr-6 max-md:w-full max-md:grid-cols-1 max-md:mr-0 max-md:mb-4">
+        <div class="w-2/3 grid grid-cols-2 gap-4 h-[fit-content] mr-6 max-md:w-full max-md:gap-2 max-md:grid-cols-2 max-md:mr-0 max-md:mb-4">
             <?php if ($main_image_id): 
                 $full_url = wp_get_attachment_image_url($main_image_id, 'full');
                 $thumb = wp_get_attachment_image($main_image_id, 'full', false, ['class' => 'w-full h-full object-cover mag-pic']);
@@ -30,7 +30,7 @@ $categories = wp_get_post_terms( get_the_ID(), 'product_cat', ['fields' => 'slug
                 $thumb = wp_get_attachment_image($id, 'full', false, ['class' => 'w-full h-full object-cover mag-pic']);
             ?>
                 <a href="<?php echo esc_url($full); ?>"
-                    class="glightbox aspect-square overflow-hidden <?php echo $index === 0 ? '' : 'max-md:hidden'; ?>"
+                    class="glightbox aspect-square overflow-hidden <?php echo $index > 3 ? 'max-md:hidden' : ''; ?>"
                     data-gallery="product-gallery">
                     <?php echo $thumb; ?>
                 </a>
