@@ -39,7 +39,7 @@ get_header();
         <li class="flex items-center flex-col">
           <p class="how-it-works__num">1</p>
           <h3 class="text-xl font-semibold mb-2 uppercase">Upload Your Photo</h3>
-          <p> Choose a photo from your phone or computer to start creating your <strong>custom photo fridge magnet</strong>. We recommend using a high-resolution image for the best results.</p>
+          <p> Choose a photo from your phone or computer to start creating your <a href="/custom-photo-magnets/" class="underline">custom photo fridge magnet</a>. We recommend using a high-resolution image for the best results.</p>
         </li>
         <li class="flex items-center flex-col">
           <p class="how-it-works__num">2</p>
@@ -145,10 +145,10 @@ get_header();
           <?php endif; ?>
         </div>
   </section>
-  <section id="cta" class="py-16 text-white text-center px-6 max-sm:px-4">
+  <section id="cta" class="py-16 text-center px-6 max-sm:px-4">
     <div class="container text-blue">
-      <h2 class="text-3xl font-bold mb-4">Ready to Create Your Custom Photo Fridge Magnet?</h2>
-      <p class="p-light mb-6">Turn your favorite memory into a fridge photo magnet today. <br>Whether it's a family photo, a vacation moment, or a gift idea — we make it easy and fast.</p>
+      <h2 class="text-3xl font-bold mb-4 text-white">Ready to Create Your Custom Photo Fridge Magnet?</h2>
+      <p class="p-light mb-6 text-white">Turn your favorite memory into a fridge photo magnet today. <br>Whether it's a family photo, a vacation moment, or a gift idea — we make it easy and fast.</p>
       <a href="/custom-photo-magnets" class="btn cta__btn py-3 px-6">Upload Your Photo</a>
     </div>
   </section>
@@ -166,7 +166,7 @@ get_header();
         </li>
         <li class="border-b py-4">
           <h3 class="text-xl font-semibold mb-2">Can I order in bulk?</h3>
-          <p class="p-light">Yes! We offer bulk discounts for parties, weddings, and business events. <a href="/contact">Contact us</a> for custom pricing or visit the <a href="/product/bulk-order">Bulk Order</a> page.</p>
+          <p class="p-light">Yes! We offer bulk discounts for parties, weddings, and business events. <a href="/contact" class="underline">Contact us</a> for custom pricing or visit the <a href="/product/bulk-order" class="underline">Bulk Order</a> page.</p>
         </li>
       </ul>
     </div>
