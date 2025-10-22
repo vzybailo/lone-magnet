@@ -71,51 +71,71 @@ document.addEventListener('DOMContentLoaded', () => {
   const debounceDelay = 500;
   let debounceTimer;
 
-  // Находим все поля количества
-  const quantityInputs = document.querySelectorAll('.qty');
+  // Функция для обновления корзины с задержкой
+  function triggerUpdate() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      document.querySelector('[name="update_cart"]')?.click();
+    }, debounceDelay);
+  }
 
-  quantityInputs.forEach((input) => {
-    input.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        let qty = parseInt(input.value);
-        if (isNaN(qty) || qty < 1) {
-          qty = 1;
-          input.value = qty;
-        }
-
-        // Симуляция клика по кнопке "Обновить корзину"
-        document.querySelector('[name="update_cart"]')?.click();
-      }, debounceDelay);
-    });
-  });
-
-  // Обработка кнопок + и -
-  document.querySelectorAll('.decrease-number').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const container = btn.closest('.quantity');
+  // Делегируем клики (чтобы работало даже после AJAX WooCommerce)
+  document.addEventListener('click', (e) => {
+    // Кнопка "+"
+    if (e.target.matches('.increase-number')) {
+      const container = e.target.closest('.quantity');
       const input = container?.querySelector('.qty');
       if (!input) return;
+
+      const max = parseInt(input.getAttribute('max')) || Infinity;
+      let currentQty = parseInt(input.value) || 1;
+
+      if (currentQty < max) {
+        input.value = currentQty + 1;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        input.value = max; // фиксируем на максимуме
+      }
+    }
+
+    // Кнопка "–"
+    if (e.target.matches('.decrease-number')) {
+      const container = e.target.closest('.quantity');
+      const input = container?.querySelector('.qty');
+      if (!input) return;
+
       let currentQty = parseInt(input.value) || 1;
       if (currentQty > 1) {
         input.value = currentQty - 1;
-        input.dispatchEvent(new Event('input'));
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        input.value = 1;
       }
-    });
+    }
   });
 
-  document.querySelectorAll('.increase-number').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const container = btn.closest('.quantity');
-      const input = container?.querySelector('.qty');
-      if (!input) return;
-      let currentQty = parseInt(input.value) || 1;
-      input.value = currentQty + 1;
-      input.dispatchEvent(new Event('input'));
-    });
+  // Контроль ручного ввода (не больше max и не меньше 1)
+  document.addEventListener('input', (e) => {
+    if (!e.target.matches('.qty')) return;
+
+    const input = e.target;
+    const max = parseInt(input.getAttribute('max')) || Infinity;
+    let value = parseInt(input.value);
+
+    if (isNaN(value) || value < 1) value = 1;
+    if (value > max) value = max;
+
+    input.value = value;
+    triggerUpdate();
   });
+
+  // Повторная инициализация после AJAX обновления корзины
+  if (typeof jQuery !== 'undefined') {
+    jQuery(document.body).on('updated_cart_totals', () => {
+      console.log('Cart updated — custom quantity script still active');
+    });
+  }
 });
-
 
 // пересчитывается общая стоимость в корзине при измении количества товаров
 document.addEventListener('DOMContentLoaded', function () {
@@ -270,11 +290,3 @@ document.querySelectorAll('.show-more').forEach(btn => {
     btn.textContent = text.classList.contains('line-clamp-4') ? 'Show more' : 'Show less';
   });
 });
-
-
-
-
-
-
-
-

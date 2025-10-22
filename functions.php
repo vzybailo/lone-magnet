@@ -55,36 +55,40 @@ add_action('after_setup_theme', 'lone_setup_theme');
 function render_custom_upload_button() {
     global $product;
     $product_id = $product->get_id();
-    $categories = wp_get_post_terms( get_the_ID(), 'product_cat', ['fields' => 'slugs'] );
-    $mode = in_array('bulk', $categories) ? 'bulk' : 'set9';
+    $categories = wp_get_post_terms(get_the_ID(), 'product_cat', ['fields' => 'slugs']);
+
+    // Определяем режим
+    $mode = 'set9';
+    $photos_per_item = 9;
+
+    if (in_array('bulk', $categories)) {
+        $mode = 'bulk';
+        $photos_per_item = 1;
+    } elseif (in_array('custom6', $categories)) {
+        $mode = 'custom6';
+        $photos_per_item = 1;
+    }
 
     echo '<button type="button" class="bg-wine text-white hover:bg-wine-dark w-full p-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
-    echo '<div id="custom-photo-modal-root" data-product-id="' . esc_attr($product_id) . '" data-mode="' . esc_attr($mode) . '"></div>';
-    echo '<div class="lone-alert text-sm"></div>';
-}
-add_action('woocommerce_before_add_to_cart_button', 'render_custom_upload_button');
-
-function render_custom_upload_button_custom6() {
-    global $product;
-    $product_id = $product->get_id();
-    $categories = wp_get_post_terms(get_the_ID(), 'product_cat', ['fields' => 'slugs']);
-    
-    // Проверяем, что это товар категории custom6
-    if (!in_array('custom6', $categories)) return;
-
-    // Счётчик количества фото
-    echo '<label for="photo-count" class="block mb-1 text-sm font-semibold">Select number of photos (1–6):</label>';
-    echo '<input type="number" id="photo-count" class="w-16 p-1 border rounded" min="1" max="6" value="1">';
-
-    // Кнопка загрузки
-    echo '<button type="button" class="bg-wine text-white hover:bg-wine-dark w-full p-2 mt-2 transition-colors duration-300" id="custom-photo-upload">Add photos</button>';
-
-    // Контейнер для фронтенд-логики
-    echo '<div id="custom-photo-modal-root" data-product-id="' . esc_attr($product_id) . '" data-mode="custom6" data-max-photos="1"></div>';
+    echo '<div 
+        id="custom-photo-modal-root"
+        data-product-id="' . esc_attr($product_id) . '"
+        data-mode="' . esc_attr($mode) . '"
+        data-photos-per-item="' . esc_attr($photos_per_item) . '"
+    ></div>';
     echo '<div class="lone-alert text-sm mt-1"></div>';
 }
-add_action('woocommerce_before_add_to_cart_button', 'render_custom_upload_button_custom6', 20);
+add_action('woocommerce_before_add_to_cart_button', 'render_custom_upload_button', 20);
 
+// max quantity for the custom6
+add_filter( 'woocommerce_add_to_cart_validation', 'limit_custom6_quantity', 10, 3 );
+function limit_custom6_quantity( $passed, $product_id, $quantity ) {
+    if ( has_term( 'custom6', 'product_cat', $product_id ) && $quantity > 6 ) {
+        wc_add_notice( sprintf( 'Максимальное количество для этого товара: %d', 6 ), 'error' );
+        return false;
+    }
+    return $passed;
+}
 
 // custom classes for price
 function custom_woocommerce_price_html( $price, $product ) {
