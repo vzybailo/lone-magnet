@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { v4 as uuid } from "uuid";
 import PhotoModal from "./components/PhotoModal";
 
 const PhotoUploadApp = () => {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(1); // для custom6 — это число магнитов
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showMsg, setShowMsg] = useState(false);
@@ -12,36 +12,48 @@ const PhotoUploadApp = () => {
   const container = document.getElementById("custom-photo-modal-root");
   const productId = container?.dataset?.productId || "unknown";
   const mode = container?.dataset?.mode || "default"; 
-  const STORAGE_KEY = `magnet_photos_product_${productId}`;
-  const requiredPhotos = mode === "bulk" ? 1 : quantity * 9;
+  // сколько фото требуется на 1 магнит (для custom6)
+  const photosPerMagnet = parseInt(container?.dataset?.photosPerMagnet || "1", 10);
 
+  const STORAGE_KEY = `magnet_photos_product_${productId}_${mode}`;
+
+  // вычисляем requiredPhotos в зависимости от режима
+  const requiredPhotos = useMemo(() => {
+    if (mode === "bulk") return 1;
+    if (mode === "custom6") return Math.max(1, quantity) * Math.max(1, photosPerMagnet);
+    // default — старое поведение (9 фото на 1 "item")
+    return Math.max(1, quantity) * 9;
+  }, [mode, quantity, photosPerMagnet]);
+
+  // Инициализация: слушаем обычный инпут qty и кнопки +/-
   useEffect(() => {
     const input = document.querySelector(".mag-quantity");
     const plusBtn = document.querySelector("#increase-number");
     const minusBtn = document.querySelector("#decrease-number");
 
-    const updateQuantity = () => {
+    const updateQuantityFromInput = () => {
       if (input) {
         const value = parseInt(input.value, 10);
         setQuantity(isNaN(value) || value < 1 ? 1 : value);
       }
     };
 
-    input?.addEventListener("input", updateQuantity);
-    input?.addEventListener("change", updateQuantity);
-    plusBtn?.addEventListener("click", () => setTimeout(updateQuantity, 0));
-    minusBtn?.addEventListener("click", () => setTimeout(updateQuantity, 0));
+    input?.addEventListener("input", updateQuantityFromInput);
+    input?.addEventListener("change", updateQuantityFromInput);
+    plusBtn?.addEventListener("click", () => setTimeout(updateQuantityFromInput, 0));
+    minusBtn?.addEventListener("click", () => setTimeout(updateQuantityFromInput, 0));
 
-    updateQuantity();
+    updateQuantityFromInput();
 
     return () => {
-      input?.removeEventListener("input", updateQuantity);
-      input?.removeEventListener("change", updateQuantity);
-      plusBtn?.removeEventListener("click", updateQuantity);
-      minusBtn?.removeEventListener("click", updateQuantity);
+      input?.removeEventListener("input", updateQuantityFromInput);
+      input?.removeEventListener("change", updateQuantityFromInput);
+      plusBtn?.removeEventListener("click", updateQuantityFromInput);
+      minusBtn?.removeEventListener("click", updateQuantityFromInput);
     };
   }, []);
 
+  // Восстановление сохранённых фото
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -49,28 +61,28 @@ const PhotoUploadApp = () => {
     }
   }, [STORAGE_KEY]);
 
+  // Обработчик добавления товара в корзину — оставил вашу логику, но проверяем requiredPhotos
   useEffect(() => {
     const addToCartBtn = document.querySelector("#lone-add-to-cart");
     const alertMsg = document.querySelector(".lone-alert");
 
     const handleClick = (e) => {
       const hiddenInput = document.querySelector("#magnet_photos_data");
-
-      if (hiddenInput) {
-        hiddenInput.value = JSON.stringify(uploadedPhotos);
-      }
+      if (hiddenInput) hiddenInput.value = JSON.stringify(uploadedPhotos);
 
       setShowMsg(true);
 
       if (uploadedPhotos.length !== requiredPhotos) {
-        e.preventDefault();
+        e.preventDefault(); // блокируем добавление
       } else {
+        // очистка после успешного добавления
         setUploadedPhotos([]);
         sessionStorage.removeItem(STORAGE_KEY);
         setShowMsg(false);
-      }      
+      }
 
-      if (showMsg && uploadedPhotos.length === 0) {
+      // показываем сообщение, если нет фото
+      if (showMsg && uploadedPhotos.length === 0 && alertMsg) {
         alertMsg.innerHTML = `<div class="py-2 warn">
           ⚠️ You haven’t uploaded any photos yet. Please upload <b>${requiredPhotos}</b> photo${requiredPhotos > 1 ? "s" : ""} to complete your order.
         </div>`;
@@ -78,11 +90,10 @@ const PhotoUploadApp = () => {
     };
 
     addToCartBtn?.addEventListener("click", handleClick);
-    return () => {
-      addToCartBtn?.removeEventListener("click", handleClick);
-    };
-  }, [uploadedPhotos, requiredPhotos]);
+    return () => addToCartBtn?.removeEventListener("click", handleClick);
+  }, [uploadedPhotos, requiredPhotos, showMsg, STORAGE_KEY]);
 
+  // Обновление ленты предупреждений/успеха
   useEffect(() => {
     const alertMsg = document.querySelector(".lone-alert");
     if (!alertMsg || !showMsg) return;
@@ -106,7 +117,7 @@ const PhotoUploadApp = () => {
         Please upload <b>${remaining}</b> more photo${remaining > 1 ? "s" : ""} to complete your order.
       </div>`;
     } else {
-      const maxItems = Math.floor(uploadedPhotos.length / 9);
+      const maxItems = Math.floor(uploadedPhotos.length / (photosPerMagnet || 1));
       const extra = uploadedPhotos.length - requiredPhotos;
       addClass("warn");
       alertMsg.innerHTML = `<div class="py-2">
@@ -114,8 +125,9 @@ const PhotoUploadApp = () => {
         You can either remove the extra <b>${extra}</b> photo${extra > 1 ? "s" : ""}, or update your order to <b>${maxItems}</b> item${maxItems > 1 ? "s" : ""}.
       </div>`;
     }
-  }, [uploadedPhotos, requiredPhotos, quantity, showMsg]);
+  }, [uploadedPhotos, requiredPhotos, quantity, photosPerMagnet, showMsg]);
 
+  // Когда пользователь завершил аплоад в модале
   const handlePhotoComplete = (uploaded) => {
     const newPhoto = { id: uuid(), url: uploaded.url };
     const newPhotos = [...uploadedPhotos, newPhoto];
@@ -132,6 +144,7 @@ const PhotoUploadApp = () => {
     sessionStorage.setItem("showMsg", "true");
   };
 
+  // Обработчик клика по кнопке "Add photos"
   useEffect(() => {
     const uploadBtn = document.querySelector("#custom-photo-upload");
 
@@ -142,11 +155,41 @@ const PhotoUploadApp = () => {
     };
 
     uploadBtn?.addEventListener("click", handleUploadClick);
-
-    return () => {
-      uploadBtn?.removeEventListener("click", handleUploadClick);
-    };
+    return () => uploadBtn?.removeEventListener("click", handleUploadClick);
   }, []);
+
+  //#photo-count для custom6 
+  useEffect(() => {
+    if (mode !== "custom6") return;
+
+    const photoCountInput = document.getElementById("photo-count");
+    const hiddenQuantityInput = document.getElementById("custom6-quantity-hidden");
+    const themeQtyInput = document.querySelector('input.qty');
+
+    const applyQuantity = (value) => {
+      const v = Math.min(6, Math.max(1, parseInt(value || 1, 10)));
+      setQuantity(v);
+
+      if (hiddenQuantityInput) hiddenQuantityInput.value = v;
+
+      if (themeQtyInput) {
+        themeQtyInput.value = v;
+        themeQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+
+    if (photoCountInput) {
+      const onInput = () => applyQuantity(photoCountInput.value);
+      photoCountInput.addEventListener("input", onInput);
+      photoCountInput.addEventListener("change", onInput);
+
+      applyQuantity(photoCountInput.value);
+      return () => {
+        photoCountInput.removeEventListener("input", onInput);
+        photoCountInput.removeEventListener("change", onInput);
+      };
+    }
+  }, [mode]);
 
   return (
     <>
@@ -185,11 +228,10 @@ const PhotoUploadApp = () => {
   );
 };
 
-const container = document.getElementById("custom-photo-modal-root");
-
-if (container) {
-  container.innerHTML = "";
-  const productId = container.dataset.productId || "unknown";
-  const root = createRoot(container);
-  root.render(<PhotoUploadApp productId={productId} />);
+// монтирование на странице (оставил как у тебя)
+const mountContainer = document.getElementById("custom-photo-modal-root");
+if (mountContainer) {
+  mountContainer.innerHTML = "";
+  const root = createRoot(mountContainer);
+  root.render(<PhotoUploadApp />);
 }
